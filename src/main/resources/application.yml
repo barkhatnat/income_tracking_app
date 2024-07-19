@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: income_tracking
+  datasource:
+    url: jdbc:postgresql://postgres:5432/income_tracking
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:/db/changelog/db.master-changelog.yaml
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+security:
+  jwt:
+    secret-key: mysecretkey
+server:
+  port: 7128

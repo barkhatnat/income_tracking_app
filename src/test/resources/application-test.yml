@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:15:///${spring.application.name}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
