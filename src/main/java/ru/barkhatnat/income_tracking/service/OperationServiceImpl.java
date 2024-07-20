@@ -45,7 +45,7 @@ public class OperationServiceImpl implements OperationService {
         if (!account.get().getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())){
             throw new IllegalArgumentException("You do not have permission to create operation for this account.");
         }
-        return operationRepository.findOperationsByAccount_Id(accountId);
+        return operationRepository.findOperationsByAccountId(accountId);
     }
 
     @Override

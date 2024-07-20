@@ -27,6 +27,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+
+    //TODO delete
     @Override
     public Iterable<Account> findAllUserAccounts(UUID userId) {
         Optional<User> user = findUser(userId);
