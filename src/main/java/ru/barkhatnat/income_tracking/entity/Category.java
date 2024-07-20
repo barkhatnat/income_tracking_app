@@ -31,7 +31,7 @@ public class Category {
     @NotNull
     private Boolean categoryType;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;

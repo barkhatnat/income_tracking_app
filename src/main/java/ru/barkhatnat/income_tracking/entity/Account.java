@@ -38,8 +38,8 @@ public class Account {
     @DecimalMax(value = "9999999999.99")
     private BigDecimal balance;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
 
