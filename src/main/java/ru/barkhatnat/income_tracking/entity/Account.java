@@ -2,10 +2,7 @@ package ru.barkhatnat.income_tracking.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +25,7 @@ public class Account {
     private UUID id;
 
     @Column
-    @NotNull
+    @NotBlank
     @Size(min = 1, max = 32)
     private String title;
 

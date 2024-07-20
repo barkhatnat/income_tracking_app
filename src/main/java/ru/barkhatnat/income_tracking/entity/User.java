@@ -1,6 +1,7 @@
 package ru.barkhatnat.income_tracking.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -24,17 +25,17 @@ public class User {
     private UUID id;
 
     @Column
-    @NotNull
+    @NotBlank
     @Size(min = 1, max = 64)
     private String username;
 
     @Column
-    @NotNull
+    @NotBlank
     @Size(min = 1, max = 256)
     private String password;
 
     @Column
-    @NotNull
+    @NotBlank
     @Size(min = 1, max = 128)
     private String email;
 
