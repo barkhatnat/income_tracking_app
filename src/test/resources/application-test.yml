@@ -1,5 +1,12 @@
 spring:
   datasource:
     url: jdbc:tc:postgresql:15:///${spring.application.name}
+    username: postgres
+    password: postgres
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    hibernate:
+      ddl-auto: validate
+liquibase:
+  change-log: classpath:db/changelog/db.master-changelog.yaml
