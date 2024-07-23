@@ -25,11 +25,12 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final UserServiceImpl userService;
     private final AccountMapper accountMapper;
+    private final SecurityUtil securityUtil;
 
     @Override
     @Transactional
     public Iterable<Account> findAllAccounts() {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         return accountRepository.findAccountsByUserId(id);
     }
 
@@ -41,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountResponseDto createAccount(AccountDto accountDto) {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         Optional<User> user = userService.findUser(id);
         if (user.isEmpty()) {
             throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
@@ -61,7 +62,7 @@ public class AccountServiceImpl implements AccountService {
     public void updateAccount(UUID id, String title, BigDecimal balance) {
 
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
+                    if (account.getUser() != null && account.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
                         account.setTitle(title);
                         account.setBalance(balance);
                     } else {
@@ -77,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void deleteAccount(UUID id) {
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
+                    if (account.getUser() != null && account.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
                         accountRepository.deleteById(id);
                     } else {
                         throw new IllegalArgumentException("You do not have permission to delete this account.");

@@ -21,12 +21,13 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final CategoryMapper categoryMapper;
+    private final SecurityUtil securityUtil;
 
     @Override
     @Transactional
-    public Iterable<Category> findAllCategories() {
+    public List<Category> findAllCategories() {
         List<Category> defaultCategories = categoryRepository.findCategoriesByUserEmpty();
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         List<Category> customCategories = categoryRepository.findCategoriesByUserId(id);
         return Stream.concat(defaultCategories.stream(), customCategories.stream()).toList();
     }
@@ -34,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryResponseDto createCategory(CategoryDto categoryDto) {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         Optional<User> user = userService.findUser(id);
         if (user.isEmpty()) {
             throw new UserNotFoundException(id);
@@ -53,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void updateCategory(UUID id, String title, Boolean categoryType) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-            if (category.getUser() != null && category.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
+            if (category.getUser() != null && category.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
                 category.setTitle(title);
                 category.setCategoryType(categoryType);
             } else {
@@ -67,8 +68,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(UUID id) {
-        categoryRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
+        categoryRepository.findById(id).ifPresentOrElse(category -> {
+                    if (category.getUser() != null && category.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
                         categoryRepository.deleteById(id);
                     } else {
                         throw new IllegalArgumentException("You do not have permission to delete this category.");
