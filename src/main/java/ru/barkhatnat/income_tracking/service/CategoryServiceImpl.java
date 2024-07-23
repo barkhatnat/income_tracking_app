@@ -1,6 +1,5 @@
 package ru.barkhatnat.income_tracking.service;
 
-import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,14 +7,13 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
 import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +25,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public Iterable<Category> findAllCategories() {
-        Collection<Category> defaultCategories = categoryRepository.findCategoriesByUserEmpty();
+        List<Category> defaultCategories = categoryRepository.findCategoriesByUserEmpty();
         UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        Collection<Category> customCategories = (Collection<Category>) userService.findAllUserCategories(id);
-        return Iterables.concat(defaultCategories, customCategories);
+        List<Category> customCategories = categoryRepository.findCategoriesByUserId(id);
+        return Stream.concat(defaultCategories.stream(), customCategories.stream()).toList();
     }
 
     @Override
@@ -39,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
         UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
         Optional<User> user = userService.findUser(id);
         if (user.isEmpty()) {
-            throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
+            throw new UserNotFoundException(id);
         }
         Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user.get()));
         return categoryMapper.toCategoryResponseDto(category);

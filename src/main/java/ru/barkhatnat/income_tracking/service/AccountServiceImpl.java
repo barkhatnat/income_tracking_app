@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public Iterable<Account> findAllAccounts() {
         UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        return userService.findAllUserAccounts(id);
+        return accountRepository.findAccountsByUserId(id);
     }
 
     @Override
