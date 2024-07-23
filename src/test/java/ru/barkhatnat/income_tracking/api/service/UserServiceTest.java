@@ -37,24 +37,27 @@ public class UserServiceTest {
 
     @Test
     public void UserService_CreateUser_ReturnDto() throws UserAlreadyExistsException {
-        User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        UUID userId = UUID.randomUUID();
+        User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserCreateDto userCreateDto = new UserCreateDto("username", "password", "email@email.com");
-        UserResponseDto userResponseDto = new UserResponseDto("username", "email@email.com");
+        UserResponseDto userResponseDto = new UserResponseDto(userId,"username", "email@email.com");
         when(userRepository.findByEmail(userCreateDto.email())).thenReturn(Optional.empty());
-        when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
+        when(userRepository.save(Mockito.any(User.class))).thenReturn(savedUser);
         when(passwordEncoder.encode(userCreateDto.password())).thenReturn("encodedPassword");
-        when(userMapper.toUserResponse(user)).thenReturn(userResponseDto);
+        when(userMapper.toUserResponse(savedUser)).thenReturn(userResponseDto);
         UserResponseDto userResponseDtoTest = userService.createUser(userCreateDto);
         Assertions.assertThat(userResponseDtoTest).isNotNull();
         Assertions.assertThat(userResponseDtoTest.username()).isEqualTo(userCreateDto.username());
         Assertions.assertThat(userResponseDtoTest.email()).isEqualTo(userCreateDto.email());
+        Assertions.assertThat(userResponseDtoTest.id()).isEqualTo(userId);
     }
 
     @Test
     public void UserService_CreateUserAlreadyExists_ReturnException() {
-        User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        UUID userId = UUID.randomUUID();
+        User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserCreateDto userCreateDto = new UserCreateDto("username", "password", "email@email.com");
-        when(userRepository.findByEmail(userCreateDto.email())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(userCreateDto.email())).thenReturn(Optional.of(savedUser));
         UserAlreadyExistsException exception = assertThrows(UserAlreadyExistsException.class,
                 () -> userService.createUser(userCreateDto));
         Assertions.assertThat(exception.getMessage()).isEqualTo("User with username username already exists");
@@ -63,10 +66,10 @@ public class UserServiceTest {
     @Test
     public void UserService_FindUserById_ReturnUser() {
         UUID userId = UUID.randomUUID();
-        User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
-        when(userRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(user));
+        User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        when(userRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(savedUser));
         Optional<User> result = userService.findUser(userId);
-        Assertions.assertThat(Optional.of(user)).isEqualTo(result);
+        Assertions.assertThat(Optional.of(savedUser)).isEqualTo(result);
     }
 
     @Test
@@ -81,14 +84,16 @@ public class UserServiceTest {
     @Test
     public void UserService_UpdateUser_ReturnUser() {
         UUID userId = UUID.randomUUID();
-        User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserUpdateDto userUpdateDto = new UserUpdateDto(userId, "new_username", "new_password", "email@email.com");
         when(userRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(userUpdateDto.password())).thenReturn("encodedPassword"); // Проверка вызова encode()
+        when(passwordEncoder.encode(userUpdateDto.password())).thenReturn("encodedPassword");
         userService.updateUser(userUpdateDto);
-        Assertions.assertThat(userRepository.findById(userId).get().getUsername()).isEqualTo(userUpdateDto.username());
-        Assertions.assertThat(userRepository.findById(userId).get().getPassword()).isEqualTo("encodedPassword");
-        Assertions.assertThat(userRepository.findById(userId).get().getEmail()).isEqualTo(userUpdateDto.email());
+        Optional<User> updatedUser = userRepository.findById(userId);
+        Assertions.assertThat(updatedUser).isPresent();
+        Assertions.assertThat(updatedUser.get().getUsername()).isEqualTo(userUpdateDto.username());
+        Assertions.assertThat(updatedUser.get().getPassword()).isEqualTo("encodedPassword");
+        Assertions.assertThat(updatedUser.get().getEmail()).isEqualTo(userUpdateDto.email());
 
         Mockito.verify(passwordEncoder).encode(userUpdateDto.password());
     }
