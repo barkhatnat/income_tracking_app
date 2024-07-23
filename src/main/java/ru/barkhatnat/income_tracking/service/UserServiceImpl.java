@@ -7,8 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.barkhatnat.income_tracking.DTO.UserCreateDto;
 import ru.barkhatnat.income_tracking.DTO.UserResponseDto;
 import ru.barkhatnat.income_tracking.DTO.UserUpdateDto;
-import ru.barkhatnat.income_tracking.entity.Account;
-import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
 import ru.barkhatnat.income_tracking.exception.UserAlreadyExistsException;
 import ru.barkhatnat.income_tracking.repositories.UserRepository;
@@ -26,26 +24,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-
-
-    //TODO delete
-    @Override
-    public Iterable<Account> findAllUserAccounts(UUID userId) {
-        Optional<User> user = findUser(userId);
-        if (user.isEmpty()) {
-            throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
-        }
-        return user.get().getAccounts();
-    }
-
-    @Override
-    public Iterable<Category> findAllUserCategories(UUID userId) {
-        Optional<User> user = findUser(userId);
-        if (user.isEmpty()) {
-            throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
-        }
-        return user.get().getCategories();
-    }
 
     @Override
     @Transactional
@@ -67,9 +45,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(UserUpdateDto userUpdateDto) {
+        String encodedPassword = passwordEncoder.encode(userUpdateDto.password());
         this.userRepository.findById(userUpdateDto.id()).ifPresentOrElse(user -> {
                     user.setUsername(userUpdateDto.username());
-                    user.setPassword(userUpdateDto.password());
+                    user.setPassword(encodedPassword);
                     user.setEmail(userUpdateDto.email());
                 }, () -> {
                     throw new NoSuchElementException();
@@ -90,5 +69,4 @@ public class UserServiceImpl implements UserService {
     private String getRole() {
         return "USER";
     }
-
 }
