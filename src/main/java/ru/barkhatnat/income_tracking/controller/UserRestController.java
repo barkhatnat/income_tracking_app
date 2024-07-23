@@ -22,10 +22,11 @@ import java.util.UUID;
 public class UserRestController {
     private final UserService userService;
     private final UserMapper userMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser() {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         Optional<User> user = userService.findUser(id);
         return user.map(value -> ResponseEntity.ok(userMapper.toUserResponse(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
