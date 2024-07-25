@@ -13,8 +13,10 @@ import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.service.CategoryService;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.net.URI;
+import java.util.UUID;
 
 
 @RestController
@@ -24,10 +26,12 @@ import java.net.URI;
 public class CategoriesRestController {
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<Iterable<CategoryResponseDto>> getCategoryList() {
-        Iterable<Category> categories = categoryService.findAllCategories();
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        Iterable<Category> categories = categoryService.findAllCategories(currentUserId);
         Iterable<CategoryResponseDto> categoryResponseDto = categoryMapper.toCategoryResponseDtoCollection(categories);
         return ResponseEntity.ok(categoryResponseDto);
     }
@@ -43,7 +47,8 @@ public class CategoriesRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            CategoryResponseDto categoryResponseDto = categoryService.createCategory(categoryDto);
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            CategoryResponseDto categoryResponseDto = categoryService.createCategory(categoryDto, currentUserId);
             return ResponseEntity.created(URI.create(uriComponentsBuilder
                             .replacePath("/categories")
                             .build().toUriString()))

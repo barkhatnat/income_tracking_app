@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.service.CategoryService;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/categories/{categoryId:\\d+}") //TODO change pattern for uuid
 public class CategoryRestController {
     private final CategoryService categoryService;
+    private final SecurityUtil securityUtil;
 
     @PatchMapping
     public ResponseEntity<?> updateCategory(@PathVariable("categoryId") UUID categoryId, @Valid @RequestBody CategoryDto categoryDto,
@@ -29,14 +31,16 @@ public class CategoryRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            categoryService.updateCategory(categoryId, categoryDto.title(), categoryDto.categoryType());
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            categoryService.updateCategory(categoryId, categoryDto.title(), categoryDto.categoryType(), currentUserId);
             return ResponseEntity.noContent().build();
         }
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteCategory(@PathVariable("categoryId") UUID categoryId) {
-        categoryService.deleteCategory(categoryId);
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        categoryService.deleteCategory(categoryId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,13 +11,11 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
-import ru.barkhatnat.income_tracking.entity.security.UserPrincipal;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.service.CategoryServiceImpl;
 import ru.barkhatnat.income_tracking.service.UserService;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
-import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -32,15 +30,11 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class CategoryServiceTest {
     @Mock
-    private SecurityUtil securityUtil;
-    @Mock
     private CategoryRepository categoryRepository;
     @Mock
     private UserService userService;
     @Mock
     private CategoryMapper categoryMapper;
-    @Mock
-    private UserPrincipal userPrincipal;
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
@@ -53,14 +47,11 @@ public class CategoryServiceTest {
         Category category = new Category(categoryId, categoryDto.title(), categoryDto.categoryType(), user);
         CategoryResponseDto expectedCategoryResponseDto = new CategoryResponseDto(categoryId, "Test Category", Boolean.FALSE);
 
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
-
         when(userService.findUser(userId)).thenReturn(Optional.of(user));
         when(categoryRepository.save(Mockito.any(Category.class))).thenReturn(category);
         when(categoryMapper.toCategoryResponseDto(category)).thenReturn(expectedCategoryResponseDto);
 
-        CategoryResponseDto actualCategoryResponseDto = categoryService.createCategory(categoryDto);
+        CategoryResponseDto actualCategoryResponseDto = categoryService.createCategory(categoryDto, userId);
         Assertions.assertThat(actualCategoryResponseDto).isEqualTo(expectedCategoryResponseDto);
     }
 
@@ -73,13 +64,10 @@ public class CategoryServiceTest {
         Category defaultCategory1 = new Category("defaultCategory1", Boolean.FALSE, null);
         Category defaultCategory2 = new Category("defaultCategory2", Boolean.FALSE, null);
 
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
-
         when(categoryRepository.findCategoriesByUserId(userId)).thenReturn(List.of(userCategory1, userCategory2));
         when(categoryRepository.findCategoriesByUserEmpty()).thenReturn(List.of(defaultCategory1, defaultCategory2));
 
-        List<Category> categories = categoryService.findAllCategories();
+        List<Category> categories = categoryService.findAllCategories(userId);
         Assertions.assertThat(categories).hasSize(4);
     }
 
@@ -106,12 +94,9 @@ public class CategoryServiceTest {
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Category category = new Category(categoryId, "userCategory1", Boolean.FALSE, user);
 
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
-
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        categoryService.updateCategory(categoryId, newTitle, newCategoryType);
+        categoryService.updateCategory(categoryId, newTitle, newCategoryType, userId);
         Optional<Category> updatedCategory = categoryRepository.findById(categoryId);
         Assertions.assertThat(updatedCategory).isPresent();
         Assertions.assertThat(updatedCategory.get().getTitle()).isEqualTo(newTitle);
@@ -128,23 +113,21 @@ public class CategoryServiceTest {
         User otherUser = new User(otherUserId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Category category = new Category(categoryId, "Old Category", false, otherUser);
 
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
-
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         assertThrows(ForbiddenException.class,
-                () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType));
+                () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType, userId));
     }
 
     @Test
     public void CategoryService_UpdateCategoryById_ThrowNoSuchElementException() {
         UUID categoryId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         String newTitle = "Updated Category";
         Boolean newCategoryType = true;
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
         assertThrows(NoSuchElementException.class,
-                () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType));
+                () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType, userId));
     }
 
     @Test
@@ -154,12 +137,9 @@ public class CategoryServiceTest {
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Category category = new Category(categoryId, "userCategory1", Boolean.FALSE, user);
 
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
-
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        categoryService.deleteCategory(categoryId);
+        categoryService.deleteCategory(categoryId, userId);
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
         Assertions.assertThat(categoryRepository.findById(categoryId)).isEmpty();
     }
@@ -167,11 +147,12 @@ public class CategoryServiceTest {
     @Test
     public void CategoryService_DeleteCategory_ThrowNoSuchElementException() {
         UUID categoryId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class,
-                () -> categoryService.deleteCategory(categoryId));
+                () -> categoryService.deleteCategory(categoryId, userId));
     }
 
     @Test
@@ -181,13 +162,11 @@ public class CategoryServiceTest {
         UUID otherUserId = UUID.randomUUID();
         User otherUser = new User(otherUserId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Category category = new Category(categoryId, "userCategory1", Boolean.FALSE, otherUser);
-        when(securityUtil.getCurrentUserDetails()).thenReturn(userPrincipal);
-        when(userPrincipal.getUserId()).thenReturn(userId);
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
         assertThrows(ForbiddenException.class,
-                () -> categoryService.deleteCategory(categoryId));
+                () -> categoryService.deleteCategory(categoryId, userId));
     }
 
 }

@@ -11,7 +11,6 @@ import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
-import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -22,22 +21,19 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
     private final CategoryMapper categoryMapper;
-    private final SecurityUtil securityUtil;
 
     @Override
     @Transactional
-    public List<Category> findAllCategories() {
+    public List<Category> findAllCategories(UUID userId) {
         List<Category> defaultCategories = categoryRepository.findCategoriesByUserEmpty();
-        UUID id = securityUtil.getCurrentUserDetails().getUserId();
-        List<Category> customCategories = categoryRepository.findCategoriesByUserId(id);
+        List<Category> customCategories = categoryRepository.findCategoriesByUserId(userId);
         return Stream.concat(defaultCategories.stream(), customCategories.stream()).toList();
     }
 
     @Override
     @Transactional
-    public CategoryResponseDto createCategory(CategoryDto categoryDto) {
-        UUID id = securityUtil.getCurrentUserDetails().getUserId();
-        User user = userService.findUser(id).orElseThrow(() -> new UserNotFoundException(id));
+    public CategoryResponseDto createCategory(CategoryDto categoryDto, UUID userId) {
+        User user = userService.findUser(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user));
         return categoryMapper.toCategoryResponseDto(category);
     }
@@ -50,9 +46,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void updateCategory(UUID id, String title, Boolean categoryType) {
+    public void updateCategory(UUID id, String title, Boolean categoryType, UUID userId) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-            checkCategoryOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+            checkCategoryOwnership(id, userId);
             category.setTitle(title);
             category.setCategoryType(categoryType);
         }, () -> {
@@ -62,9 +58,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void deleteCategory(UUID id) {
+    public void deleteCategory(UUID id, UUID userId) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-                    checkCategoryOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+                    checkCategoryOwnership(id, userId);
                     categoryRepository.deleteById(id);
                 }, () -> {
                     throw new NoSuchElementException();

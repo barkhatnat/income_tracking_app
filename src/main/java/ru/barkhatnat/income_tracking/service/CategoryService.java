@@ -8,13 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoryService {
-    Iterable<Category> findAllCategories();
+    Iterable<Category> findAllCategories(UUID userId);
 
-    CategoryResponseDto createCategory(CategoryDto categoryDto);
+    CategoryResponseDto createCategory(CategoryDto categoryDto, UUID userId);
 
     Optional<Category> findCategory(UUID id);
 
-    void updateCategory(UUID id, String title, Boolean categoryType);
+    void updateCategory(UUID id, String title, Boolean categoryType, UUID userId);
 
-    void deleteCategory(UUID id);
+    void deleteCategory(UUID id, UUID userId);
 }
