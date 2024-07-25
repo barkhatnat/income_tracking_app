@@ -13,8 +13,10 @@ import ru.barkhatnat.income_tracking.DTO.AccountResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.service.AccountService;
 import ru.barkhatnat.income_tracking.utils.AccountMapper;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -23,10 +25,12 @@ import java.util.Map;
 public class AccountsRestController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<Iterable<AccountResponseDto>> getAccountsList() {
-        Iterable<Account> accounts = accountService.findAllAccountsByUserId();
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        Iterable<Account> accounts = accountService.findAllAccountsByUserId(currentUserId);
         Iterable<AccountResponseDto> userResponseCollection = accountMapper.toAccountResponseDtoCollection(accounts);
         return ResponseEntity.ok(userResponseCollection);
     }
@@ -42,7 +46,8 @@ public class AccountsRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            AccountResponseDto accountResponseDto = accountService.createAccount(accountDto);
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            AccountResponseDto accountResponseDto = accountService.createAccount(accountDto, currentUserId);
             return ResponseEntity.created(uriComponentsBuilder
                             .replacePath("/accounts/{accountId}")
                             .build(Map.of("accountId", accountResponseDto.id())))

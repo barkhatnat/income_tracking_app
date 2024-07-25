@@ -11,7 +11,6 @@ import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 import ru.barkhatnat.income_tracking.utils.AccountMapper;
-import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -27,19 +26,16 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final UserServiceImpl userService;
     private final AccountMapper accountMapper;
-    private final SecurityUtil securityUtil;
 
     @Override
     @Transactional
-    public List<Account> findAllAccountsByUserId() {
-        UUID id = securityUtil.getCurrentUserDetails().getUserId();
-        return accountRepository.findAccountsByUserId(id);
+    public List<Account> findAllAccountsByUserId(UUID userId) {
+        return accountRepository.findAccountsByUserId(userId);
     }
 
     @Override
     @Transactional
-    public AccountResponseDto createAccount(AccountDto accountDto) {
-        UUID userId = securityUtil.getCurrentUserDetails().getUserId();
+    public AccountResponseDto createAccount(AccountDto accountDto, UUID userId) {
         User user = userService.findUser(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Account account = accountRepository.save(
@@ -56,9 +52,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void updateAccount(UUID id, String title, BigDecimal balance) {
+    public void updateAccount(UUID id, String title, BigDecimal balance, UUID userId) {
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    checkAccountOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+                    checkAccountOwnership(id, userId);
                     account.setTitle(title);
                     account.setBalance(balance);
                 }, () -> {
@@ -69,9 +65,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void deleteAccount(UUID id) {
+    public void deleteAccount(UUID id, UUID userId) {
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    checkAccountOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+                    checkAccountOwnership(id, userId);
                     accountRepository.deleteById(id);
                 }, () -> {
                     throw new NoSuchElementException();

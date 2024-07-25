@@ -10,13 +10,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AccountService {
-    List<Account> findAllAccountsByUserId();
+    List<Account> findAllAccountsByUserId(UUID userId);
 
-    AccountResponseDto createAccount(AccountDto accountDto);
+    AccountResponseDto createAccount(AccountDto accountDto, UUID userId);
 
     Optional<Account> findAccount(UUID id);
 
-    void updateAccount(UUID id, String title, BigDecimal balance);
+    void updateAccount(UUID id, String title, BigDecimal balance, UUID userId);
 
-    void deleteAccount(UUID id);
+    void deleteAccount(UUID id, UUID userId);
 }

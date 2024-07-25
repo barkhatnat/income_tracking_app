@@ -15,6 +15,7 @@ import ru.barkhatnat.income_tracking.DTO.AccountResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.service.AccountService;
 import ru.barkhatnat.income_tracking.utils.AccountMapper;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -24,11 +25,13 @@ import java.util.UUID;
 @RestController
 @PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
-@RequestMapping("/accounts/{accountId:\\d+}") //TODO change pattern for uuid (^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)
+@RequestMapping("/accounts/{accountId:\\d+}")
+//TODO change pattern for uuid (^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)
 public class AccountRestController {
     private final AccountService accountService;
     private final MessageSource messageSource;
     private final AccountMapper accountMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<AccountResponseDto> getAccount(@PathVariable("accountId") UUID accountId) {
@@ -46,14 +49,16 @@ public class AccountRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            this.accountService.updateAccount(accountId, accountDto.title(), accountDto.balance());
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            this.accountService.updateAccount(accountId, accountDto.title(), accountDto.balance(), currentUserId);
             return ResponseEntity.noContent().build();
         }
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteAccount(@PathVariable("accountId") UUID accountId) {
-        this.accountService.deleteAccount(accountId);
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        this.accountService.deleteAccount(accountId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 
