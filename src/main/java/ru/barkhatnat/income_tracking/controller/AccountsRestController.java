@@ -3,6 +3,7 @@ package ru.barkhatnat.income_tracking.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import ru.barkhatnat.income_tracking.utils.AccountMapper;
 import java.util.Map;
 
 @RestController
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 @RequestMapping("/accounts")
 public class AccountsRestController {
@@ -24,7 +26,7 @@ public class AccountsRestController {
 
     @GetMapping
     public ResponseEntity<Iterable<AccountResponseDto>> getAccountsList() {
-        Iterable<Account> accounts = accountService.findAllAccounts();
+        Iterable<Account> accounts = accountService.findAllAccountsByUserId();
         Iterable<AccountResponseDto> userResponseCollection = accountMapper.toAccountResponseDtoCollection(accounts);
         return ResponseEntity.ok(userResponseCollection);
     }
