@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
-@RequestMapping("/accounts/{accountId:\\d+}/operations") //TODO change pattern for uuid
+@RequestMapping("/accounts/{accountId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/operations")
 @RequiredArgsConstructor
 public class OperationsRestController {
     private final OperationService operationService;

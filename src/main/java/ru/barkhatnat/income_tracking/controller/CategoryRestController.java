@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
-@RequestMapping("/categories/{categoryId:\\d+}") //TODO change pattern for uuid
+@RequestMapping("/categories/{categoryId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
 public class CategoryRestController {
     private final CategoryService categoryService;
     private final SecurityUtil securityUtil;

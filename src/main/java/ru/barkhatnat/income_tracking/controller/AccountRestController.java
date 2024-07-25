@@ -25,8 +25,7 @@ import java.util.UUID;
 @RestController
 @PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
-@RequestMapping("/accounts/{accountId:\\d+}")
-//TODO change pattern for uuid (^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)
+@RequestMapping("/accounts/{accountId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
 public class AccountRestController {
     private final AccountService accountService;
     private final MessageSource messageSource;

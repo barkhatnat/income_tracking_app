@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
-@RequestMapping("/accounts/{accountId:\\d+}/operations/{operationId:\\d+}") //TODO change pattern for uuid
+@RequestMapping("/accounts/{accountId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/operations/{operationId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
 @RequiredArgsConstructor
 public class OperationRestController {
     private final OperationService operationService;
