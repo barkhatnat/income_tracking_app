@@ -11,6 +11,7 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.CategoryNotFoundException;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.service.CategoryServiceImpl;
@@ -20,7 +21,6 @@ import ru.barkhatnat.income_tracking.utils.CategoryMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -119,14 +119,14 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_UpdateCategoryById_ThrowNoSuchElementException() {
+    public void CategoryService_UpdateCategoryById_ThrowCategoryNotFoundException() {
         UUID categoryId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         String newTitle = "Updated Category";
         Boolean newCategoryType = true;
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class,
+        assertThrows(CategoryNotFoundException.class,
                 () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType, userId));
     }
 
@@ -145,13 +145,13 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_DeleteCategory_ThrowNoSuchElementException() {
+    public void CategoryService_DeleteCategory_ThrowCategoryNotFoundException() {
         UUID categoryId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class,
+        assertThrows(CategoryNotFoundException.class,
                 () -> categoryService.deleteCategory(categoryId, userId));
     }
 

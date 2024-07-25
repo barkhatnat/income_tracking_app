@@ -11,6 +11,7 @@ import ru.barkhatnat.income_tracking.DTO.AccountDto;
 import ru.barkhatnat.income_tracking.DTO.AccountResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.AccountNotFoundException;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 import ru.barkhatnat.income_tracking.service.AccountServiceImpl;
@@ -21,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -94,7 +94,7 @@ public class AccountServiceTest {
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
 
-        accountService.updateAccount(accountId, newTitle, newBalance,userId);
+        accountService.updateAccount(accountId, newTitle, newBalance, userId);
         Optional<Account> updatedAccount = accountService.findAccount(accountId);
 
         Assertions.assertThat(updatedAccount).isPresent();
@@ -118,14 +118,14 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_UpdateAccountById_ThrowNoSuchElementException() {
+    public void AccountService_UpdateAccountById_ThrowAccountNotFoundException() {
         UUID accountId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         String newTitle = "Updated Account";
         BigDecimal newBalance = BigDecimal.valueOf(20000);
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
-        assertThrows(NoSuchElementException.class,
+        assertThrows(AccountNotFoundException.class,
                 () -> accountService.updateAccount(accountId, newTitle, newBalance, userId));
     }
 
@@ -159,13 +159,13 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_DeleteAccountById_ThrowNoSuchElementException() {
+    public void AccountService_DeleteAccountById_ThrowAccountNotFoundException() {
         UUID accountId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class,
+        assertThrows(AccountNotFoundException.class,
                 () -> accountService.deleteAccount(accountId, userId));
     }
 }

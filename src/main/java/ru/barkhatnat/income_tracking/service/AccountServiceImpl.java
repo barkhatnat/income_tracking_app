@@ -7,6 +7,7 @@ import ru.barkhatnat.income_tracking.DTO.AccountDto;
 import ru.barkhatnat.income_tracking.DTO.AccountResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.AccountNotFoundException;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
@@ -16,7 +17,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
                     account.setTitle(title);
                     account.setBalance(balance);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new AccountNotFoundException(id);
                 }
         );
     }
@@ -70,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
                     checkAccountOwnership(id, userId);
                     accountRepository.deleteById(id);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new AccountNotFoundException(id);
                 }
         );
     }

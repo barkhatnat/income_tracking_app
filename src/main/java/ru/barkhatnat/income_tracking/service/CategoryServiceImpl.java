@@ -7,6 +7,7 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.CategoryNotFoundException;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
@@ -52,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setTitle(title);
             category.setCategoryType(categoryType);
         }, () -> {
-            throw new NoSuchElementException();
+            throw new CategoryNotFoundException(id);
         });
     }
 
@@ -63,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
                     checkCategoryOwnership(id, userId);
                     categoryRepository.deleteById(id);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new CategoryNotFoundException(id);
                 }
         );
     }
