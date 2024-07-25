@@ -14,6 +14,7 @@ import ru.barkhatnat.income_tracking.DTO.OperationResponseDto;
 import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.service.OperationService;
 import ru.barkhatnat.income_tracking.utils.OperationMapper;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,10 +26,12 @@ import java.util.UUID;
 public class OperationsRestController {
     private final OperationService operationService;
     private final OperationMapper operationMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<Iterable<OperationResponseDto>> getOperationList(@PathVariable("accountId") UUID accountId) {
-        Iterable<Operation> operations = operationService.findAllAccountOperations(accountId);
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        Iterable<Operation> operations = operationService.findAllOperationsByAccountId(accountId, currentUserId);
         Iterable<OperationResponseDto> operationResponseDto = operationMapper.toOperationResponseDtoCollection(operations);
         return ResponseEntity.ok(operationResponseDto);
     }
@@ -44,7 +47,8 @@ public class OperationsRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            OperationResponseDto operationResponseDto = operationService.createOperation(operationDto, UUID.fromString(accountId));
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            OperationResponseDto operationResponseDto = operationService.createOperation(operationDto, UUID.fromString(accountId), currentUserId);
             return ResponseEntity.created(uriComponentsBuilder
                             .replacePath("/accounts/{accountId}/operations/{operationId}")
                             .build(Map.of("accountId", accountId, "operationId", operationResponseDto.id())))
