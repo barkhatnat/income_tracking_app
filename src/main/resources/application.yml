@@ -2,7 +2,7 @@ spring:
   application:
     name: income_tracking
   datasource:
-    url: jdbc:postgresql://postgres:5432/income_tracking
+    url: jdbc:postgresql://localhost:5432/income_tracking
     username: postgres
     password: postgres
   jpa:
