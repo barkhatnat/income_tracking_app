@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.barkhatnat.income_tracking.DTO.OperationDto;
 import ru.barkhatnat.income_tracking.service.OperationService;
+import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OperationRestController {
     private final OperationService operationService;
+    private final SecurityUtil securityUtil;
 
     @PatchMapping
     public ResponseEntity<?> updateOperation(@PathVariable("operationId") UUID operationId,
@@ -31,14 +33,16 @@ public class OperationRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            operationService.updateOperation(operationId, operationDto.amount(), operationDto.datePurchase(), operationDto.categoryId(), operationDto.note(), accountId);
+            UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+            operationService.updateOperation(operationId, operationDto.amount(), operationDto.datePurchase(), operationDto.categoryId(), operationDto.note(), accountId, currentUserId);
             return ResponseEntity.noContent().build();
         }
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteCategory(@PathVariable("operationId") UUID operationId, @PathVariable("accountId") UUID accountId) {
-        operationService.deleteOperation(operationId, accountId);
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        operationService.deleteOperation(operationId, accountId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 }
