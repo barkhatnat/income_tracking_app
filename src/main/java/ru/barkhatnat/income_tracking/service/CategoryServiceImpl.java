@@ -7,10 +7,11 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.CategoryNotFoundException;
+import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
-import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -24,22 +25,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public Iterable<Category> findAllCategories() {
+    public List<Category> findAllCategories(UUID userId) {
         List<Category> defaultCategories = categoryRepository.findCategoriesByUserEmpty();
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        List<Category> customCategories = categoryRepository.findCategoriesByUserId(id);
+        List<Category> customCategories = categoryRepository.findCategoriesByUserId(userId);
         return Stream.concat(defaultCategories.stream(), customCategories.stream()).toList();
     }
 
     @Override
     @Transactional
-    public CategoryResponseDto createCategory(CategoryDto categoryDto) {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        Optional<User> user = userService.findUser(id);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(id);
-        }
-        Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user.get()));
+    public CategoryResponseDto createCategory(CategoryDto categoryDto, UUID userId) {
+        User user = userService.findUser(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user));
         return categoryMapper.toCategoryResponseDto(category);
     }
 
@@ -51,31 +47,33 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void updateCategory(UUID id, String title, Boolean categoryType) {
+    public void updateCategory(UUID id, String title, Boolean categoryType, UUID userId) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-            if (category.getUser() != null && category.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
-                category.setTitle(title);
-                category.setCategoryType(categoryType);
-            } else {
-                throw new IllegalArgumentException("You do not have permission to update this category.");
-            }
+            checkCategoryOwnership(id, userId);
+            category.setTitle(title);
+            category.setCategoryType(categoryType);
         }, () -> {
-            throw new NoSuchElementException();
+            throw new CategoryNotFoundException(id);
         });
     }
 
     @Override
     @Transactional
-    public void deleteCategory(UUID id) {
-        categoryRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
-                        categoryRepository.deleteById(id);
-                    } else {
-                        throw new IllegalArgumentException("You do not have permission to delete this category.");
-                    }
+    public void deleteCategory(UUID id, UUID userId) {
+        categoryRepository.findById(id).ifPresentOrElse(category -> {
+                    checkCategoryOwnership(id, userId);
+                    categoryRepository.deleteById(id);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new CategoryNotFoundException(id);
                 }
         );
+    }
+
+    private void checkCategoryOwnership(UUID categoryId, UUID userId) {
+        if (!categoryRepository.findById(categoryId)
+                .map(category -> category.getUser() != null && category.getUser().getId().equals(userId))
+                .orElse(false)) {
+            throw new ForbiddenException("Access denied");
+        }
     }
 }

@@ -6,16 +6,17 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.barkhatnat.income_tracking.DTO.AccountDto;
 import ru.barkhatnat.income_tracking.DTO.AccountResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
-import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.AccountNotFoundException;
+import ru.barkhatnat.income_tracking.exception.ForbiddenException;
+import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 import ru.barkhatnat.income_tracking.utils.AccountMapper;
-import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,25 +29,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Iterable<Account> findAllAccounts() {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        return accountRepository.findAccountsByUserId(id);
-    }
-
-    @Override
-    public Iterable<Operation> findAllAccountOperations(Account account) {
-        return account.getOperations();
+    public List<Account> findAllAccountsByUserId(UUID userId) {
+        return accountRepository.findAccountsByUserId(userId);
     }
 
     @Override
     @Transactional
-    public AccountResponseDto createAccount(AccountDto accountDto) {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
-        Optional<User> user = userService.findUser(id);
-        if (user.isEmpty()) {
-            throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
-        }
-        Account account = accountRepository.save(new Account(accountDto.title(), accountDto.balance(), user.get(), getCreationDate()));
+    public AccountResponseDto createAccount(AccountDto accountDto, UUID userId) {
+        User user = userService.findUser(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        Account account = accountRepository.save(
+                new Account(accountDto.title(), accountDto.balance(), user, getCreationDate())
+        );
         return accountMapper.toAccountResponseDto(account);
     }
 
@@ -58,37 +52,38 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void updateAccount(UUID id, String title, BigDecimal balance) {
-
+    public void updateAccount(UUID id, String title, BigDecimal balance, UUID userId) {
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
-                        account.setTitle(title);
-                        account.setBalance(balance);
-                    } else {
-                        throw new IllegalArgumentException("You do not have permission to update this account.");
-                    }
+                    checkAccountOwnership(id, userId);
+                    account.setTitle(title);
+                    account.setBalance(balance);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new AccountNotFoundException(id);
                 }
         );
     }
 
     @Override
     @Transactional
-    public void deleteAccount(UUID id) {
+    public void deleteAccount(UUID id, UUID userId) {
         accountRepository.findById(id).ifPresentOrElse(account -> {
-                    if (account.getUser() != null && account.getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())) {
-                        accountRepository.deleteById(id);
-                    } else {
-                        throw new IllegalArgumentException("You do not have permission to delete this account.");
-                    }
+                    checkAccountOwnership(id, userId);
+                    accountRepository.deleteById(id);
                 }, () -> {
-                    throw new NoSuchElementException();
+                    throw new AccountNotFoundException(id);
                 }
         );
     }
 
     private Timestamp getCreationDate() {
         return Timestamp.from(Instant.now());
+    }
+
+    private void checkAccountOwnership(UUID accountId, UUID userId) {
+        if (!accountRepository.findById(accountId)
+                .map(account -> account.getUser() != null && account.getUser().getId().equals(userId))
+                .orElse(false)) {
+            throw new ForbiddenException("Access denied");
+        }
     }
 }

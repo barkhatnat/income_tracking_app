@@ -58,4 +58,14 @@ public class Operation {
         this.note = note;
         this.createdAt = createdAt;
     }
+
+    public Operation(UUID id,BigDecimal amount, Timestamp datePurchase, Category category, Account account, String note, Timestamp createdAt) {
+        this.id = id;
+        this.amount = amount;
+        this.datePurchase = datePurchase;
+        this.category = category;
+        this.account = account;
+        this.note = note;
+        this.createdAt = createdAt;
+    }
 }

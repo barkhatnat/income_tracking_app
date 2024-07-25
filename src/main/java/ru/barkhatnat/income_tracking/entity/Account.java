@@ -53,4 +53,12 @@ public class Account {
         this.user = user;
         this.createdAt = createdAt;
     }
+
+    public Account(UUID id, String title, BigDecimal balance, User user, Timestamp createdAt) {
+        this.id = id;
+        this.title = title;
+        this.balance = balance;
+        this.user = user;
+        this.createdAt = createdAt;
+    }
 }

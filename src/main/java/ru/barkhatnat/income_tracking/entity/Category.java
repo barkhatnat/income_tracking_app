@@ -45,4 +45,11 @@ public class Category {
         this.categoryType = categoryType;
         this.user = user;
     }
+
+    public Category(UUID id, String title, Boolean categoryType, User user) {
+        this.id = id;
+        this.title = title;
+        this.categoryType = categoryType;
+        this.user = user;
+    }
 }

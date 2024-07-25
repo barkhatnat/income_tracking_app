@@ -4,6 +4,7 @@ package ru.barkhatnat.income_tracking.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/accounts/{accountId:\\d+}/operations") //TODO change pattern for uuid
+@PreAuthorize("isAuthenticated()")
+@RequestMapping("/accounts/{accountId:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/operations")
 @RequiredArgsConstructor
 public class OperationsRestController {
     private final OperationService operationService;

@@ -27,6 +27,7 @@ public class OperationServiceImpl implements OperationService {
     private final OperationMapper operationMapper;
     private final CategoryService categoryService;
     private final AccountService accountService;
+    private final SecurityUtil securityUtil;
 
 
     @Override
@@ -42,7 +43,7 @@ public class OperationServiceImpl implements OperationService {
         if (account.isEmpty()) {
             throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
         }
-        if (!account.get().getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())){
+        if (!account.get().getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
             throw new IllegalArgumentException("You do not have permission to create operation for this account.");
         }
         return operationRepository.findOperationsByAccountId(accountId);
@@ -59,7 +60,7 @@ public class OperationServiceImpl implements OperationService {
         if (account.isEmpty()) {
             throw new NoSuchElementException(); //TODO сделать кастомный эксепшн
         }
-        if (!account.get().getUser().getId().equals(SecurityUtil.getCurrentUserDetails().getUserId())){
+        if (!account.get().getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
             throw new IllegalArgumentException("You do not have permission to create operation for this account.");
         }
         Operation operation = operationRepository.save(new Operation(operationDto.amount(), operationDto.datePurchase(), category.get(), account.get(), operationDto.note(), getCreationDate()));

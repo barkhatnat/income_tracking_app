@@ -61,4 +61,13 @@ public class User {
         this.createdAt = createdAt;
         this.role = role;
     }
+
+    public User(UUID id, String username, String password, String email, Timestamp createdAt, String role) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.createdAt = createdAt;
+        this.role = role;
+    }
 }

@@ -3,6 +3,7 @@ package ru.barkhatnat.income_tracking.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +19,16 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 @RequestMapping("/home")
 public class UserRestController {
     private final UserService userService;
     private final UserMapper userMapper;
+    private final SecurityUtil securityUtil;
 
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser() {
-        UUID id = SecurityUtil.getCurrentUserDetails().getUserId();
+        UUID id = securityUtil.getCurrentUserDetails().getUserId();
         Optional<User> user = userService.findUser(id);
         return user.map(value -> ResponseEntity.ok(userMapper.toUserResponse(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
