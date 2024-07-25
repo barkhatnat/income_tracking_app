@@ -12,6 +12,7 @@ import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
 import ru.barkhatnat.income_tracking.entity.security.UserPrincipal;
+import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.service.CategoryServiceImpl;
 import ru.barkhatnat.income_tracking.service.UserService;
@@ -118,7 +119,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_UpdateCategoryById_ThrowIllegalArgumentException() {
+    public void CategoryService_UpdateCategoryById_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -131,7 +132,7 @@ public class CategoryServiceTest {
         when(userPrincipal.getUserId()).thenReturn(userId);
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ForbiddenException.class,
                 () -> categoryService.updateCategory(categoryId, newTitle, newCategoryType));
     }
 
@@ -174,7 +175,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_DeleteCategory_ThrowIllegalArgumentException() {
+    public void CategoryService_DeleteCategory_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
@@ -185,7 +186,7 @@ public class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ForbiddenException.class,
                 () -> categoryService.deleteCategory(categoryId));
     }
 

@@ -7,6 +7,7 @@ import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.UserNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.utils.CategoryMapper;
@@ -36,11 +37,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryResponseDto createCategory(CategoryDto categoryDto) {
         UUID id = securityUtil.getCurrentUserDetails().getUserId();
-        Optional<User> user = userService.findUser(id);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException(id);
-        }
-        Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user.get()));
+        User user = userService.findUser(id).orElseThrow(() -> new UserNotFoundException(id));
+        Category category = categoryRepository.save(new Category(categoryDto.title(), categoryDto.categoryType(), user));
         return categoryMapper.toCategoryResponseDto(category);
     }
 
@@ -54,12 +52,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void updateCategory(UUID id, String title, Boolean categoryType) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-            if (category.getUser() != null && category.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
-                category.setTitle(title);
-                category.setCategoryType(categoryType);
-            } else {
-                throw new IllegalArgumentException("You do not have permission to update this category.");
-            }
+            checkCategoryOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+            category.setTitle(title);
+            category.setCategoryType(categoryType);
         }, () -> {
             throw new NoSuchElementException();
         });
@@ -69,14 +64,19 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(UUID id) {
         categoryRepository.findById(id).ifPresentOrElse(category -> {
-                    if (category.getUser() != null && category.getUser().getId().equals(securityUtil.getCurrentUserDetails().getUserId())) {
-                        categoryRepository.deleteById(id);
-                    } else {
-                        throw new IllegalArgumentException("You do not have permission to delete this category.");
-                    }
+                    checkCategoryOwnership(id, securityUtil.getCurrentUserDetails().getUserId());
+                    categoryRepository.deleteById(id);
                 }, () -> {
                     throw new NoSuchElementException();
                 }
         );
+    }
+
+    private void checkCategoryOwnership(UUID categoryId, UUID userId) {
+        if (!categoryRepository.findById(categoryId)
+                .map(category -> category.getUser() != null && category.getUser().getId().equals(userId))
+                .orElse(false)) {
+            throw new ForbiddenException("Access denied");
+        }
     }
 }
