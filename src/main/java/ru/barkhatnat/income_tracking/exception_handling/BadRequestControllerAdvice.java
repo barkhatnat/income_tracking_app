@@ -1,4 +1,4 @@
-package ru.barkhatnat.income_tracking.exсeption_handling;
+package ru.barkhatnat.income_tracking.exception_handling;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
