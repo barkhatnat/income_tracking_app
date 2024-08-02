@@ -30,6 +30,7 @@ public class OperationServiceImpl implements OperationService {
     private final OperationMapper operationMapper;
     private final CategoryService categoryService;
     private final AccountService accountService;
+    private final BalanceService balanceService;
 
 
     @Override
@@ -47,6 +48,7 @@ public class OperationServiceImpl implements OperationService {
         Account account = accountService.findAccount(currentAccountId).orElseThrow(() -> new AccountNotFoundException(currentAccountId));
         checkAccountsOwnership(account.getId(), userId);
         Operation operation = operationRepository.save(new Operation(operationDto.amount(), operationDto.datePurchase(), category, account, operationDto.note(), getCreationDate()));
+        balanceService.calculateAccountBalance(account, operation, userId);
         return operationMapper.toOperationResponseDto(operation);
     }
 
@@ -60,6 +62,7 @@ public class OperationServiceImpl implements OperationService {
     @Transactional
     public void updateOperation(UUID id, BigDecimal amount, Timestamp datePurchase, UUID categoryId, String note, UUID currentAccountId, UUID userId) {
         operationRepository.findById(id).ifPresentOrElse(operation -> {
+            Account account = accountService.findAccount(currentAccountId).orElseThrow(() -> new AccountNotFoundException(currentAccountId));
             checkAccountsOwnership(currentAccountId, userId);
             checkOperationOwnership(id, currentAccountId);
             Category category = categoryService.findCategory(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
@@ -67,6 +70,7 @@ public class OperationServiceImpl implements OperationService {
             operation.setDatePurchase(datePurchase);
             operation.setCategory(category);
             operation.setNote(note);
+            balanceService.calculateAccountBalance(account, operation, userId);
         }, () -> {
             throw new OperationNotFoundException(id);
         });
@@ -102,5 +106,4 @@ public class OperationServiceImpl implements OperationService {
             throw new ForbiddenException("Access denied");
         }
     }
-
 }
