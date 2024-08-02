@@ -19,6 +19,7 @@ import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.OperationNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.OperationRepository;
 import ru.barkhatnat.income_tracking.service.AccountService;
+import ru.barkhatnat.income_tracking.service.BalanceService;
 import ru.barkhatnat.income_tracking.service.CategoryService;
 import ru.barkhatnat.income_tracking.service.OperationServiceImpl;
 import ru.barkhatnat.income_tracking.utils.OperationMapper;
@@ -43,8 +44,11 @@ public class OperationServiceTest {
     private CategoryService categoryService;
     @Mock
     private AccountService accountService;
+    @Mock
+    private BalanceService balanceService;
     @InjectMocks
     private OperationServiceImpl operationService;
+
 
     @Test
     public void OperationService_CreateOperation_ReturnOperationResponseDto() {
@@ -66,7 +70,6 @@ public class OperationServiceTest {
         when(accountService.findAccount(accountId)).thenReturn(Optional.of(operation.getAccount()));
         when(operationRepository.save(Mockito.any(Operation.class))).thenReturn(operation);
         when(operationMapper.toOperationResponseDto(operation)).thenReturn(expectedOperationResponseDto);
-
         OperationResponseDto actualOperationResponseDto = operationService.createOperation(operationDto, accountId, userId);
         Assertions.assertThat(actualOperationResponseDto).isEqualTo(expectedOperationResponseDto);
     }
@@ -124,7 +127,6 @@ public class OperationServiceTest {
 
         when(operationRepository.findOperationsByAccountId(accountId)).thenReturn(List.of(operation1, operation2));
         when(accountService.findAccount(accountId)).thenReturn(Optional.of(account));
-
         List<Operation> actualOperations = operationService.findAllOperationsByAccountId(accountId, userId);
         Assertions.assertThat(actualOperations).containsExactlyInAnyOrder(operation1, operation2);
         Assertions.assertThat(actualOperations.size()).isEqualTo(2);
