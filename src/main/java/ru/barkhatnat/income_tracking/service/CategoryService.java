@@ -1,5 +1,6 @@
 package ru.barkhatnat.income_tracking.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.barkhatnat.income_tracking.DTO.CategoryDto;
 import ru.barkhatnat.income_tracking.DTO.CategoryResponseDto;
 import ru.barkhatnat.income_tracking.entity.Category;
@@ -11,6 +12,9 @@ public interface CategoryService {
     Iterable<Category> findAllCategories(UUID userId);
 
     CategoryResponseDto createCategory(CategoryDto categoryDto, UUID userId);
+
+    @Transactional
+    CategoryResponseDto createDefaultCategory(CategoryDto categoryDto);
 
     Optional<Category> findCategory(UUID id, UUID userId);
 
