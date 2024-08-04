@@ -44,7 +44,7 @@ public class Account {
     @NotNull
     private Timestamp createdAt;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true)
     private List<Operation> operations;
 
     public Account(String title, BigDecimal balance, User user, Timestamp createdAt) {
