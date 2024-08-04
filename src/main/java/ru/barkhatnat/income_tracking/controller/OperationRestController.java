@@ -8,9 +8,14 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.barkhatnat.income_tracking.DTO.OperationDto;
+import ru.barkhatnat.income_tracking.DTO.OperationResponseDto;
+import ru.barkhatnat.income_tracking.entity.Operation;
+import ru.barkhatnat.income_tracking.exception.OperationNotFoundException;
 import ru.barkhatnat.income_tracking.service.OperationService;
+import ru.barkhatnat.income_tracking.utils.OperationMapper;
 import ru.barkhatnat.income_tracking.utils.SecurityUtil;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +25,14 @@ import java.util.UUID;
 public class OperationRestController {
     private final OperationService operationService;
     private final SecurityUtil securityUtil;
+    private final OperationMapper operationMapper;
+
+    @GetMapping
+    public ResponseEntity<OperationResponseDto> getOperation(@PathVariable("operationId") UUID operationId, @PathVariable("accountId") UUID accountId) {
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        Optional<Operation> operation = operationService.findOperation(operationId, accountId, currentUserId);
+        return operation.map(value -> ResponseEntity.ok(operationMapper.toOperationResponseDto(value))).orElseThrow(() -> new OperationNotFoundException(operationId));
+    }
 
     @PatchMapping
     public ResponseEntity<?> updateOperation(@PathVariable("operationId") UUID operationId,

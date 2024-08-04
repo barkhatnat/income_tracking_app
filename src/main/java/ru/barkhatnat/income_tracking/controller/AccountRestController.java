@@ -29,7 +29,8 @@ public class AccountRestController {
 
     @GetMapping
     public ResponseEntity<AccountResponseDto> getAccount(@PathVariable("accountId") UUID accountId) {
-        Optional<Account> account = accountService.findAccount(accountId);
+        UUID currentUserId = securityUtil.getCurrentUserDetails().getUserId();
+        Optional<Account> account = accountService.findAccount(accountId, currentUserId);
         return account.map(value -> ResponseEntity.ok(accountMapper.toAccountResponseDto(value))).orElseThrow(() -> new AccountNotFoundException(accountId));
     }
 

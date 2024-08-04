@@ -54,6 +54,12 @@ public class OperationServiceImpl implements OperationService {
 
     @Override
     @Transactional
+    public Optional<Operation> findOperation(UUID id, UUID currentAccountId, UUID userId) {
+        return operationRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
     public Optional<Operation> findOperation(UUID id) {
         return operationRepository.findById(id);
     }

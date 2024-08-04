@@ -16,6 +16,8 @@ public interface OperationService {
 
     OperationResponseDto createOperation(OperationDto operationDto, UUID currentAccountId, UUID userId);
 
+    Optional<Operation> findOperation(UUID id, UUID currentAccountId, UUID userId);
+
     Optional<Operation> findOperation(UUID id);
 
     void updateOperation(UUID id, BigDecimal amount, Timestamp datePurchase, UUID categoryId, String note, UUID currentAccountId, UUID userId);

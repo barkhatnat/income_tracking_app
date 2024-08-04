@@ -41,6 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    public Optional<Category> findCategory(UUID id, UUID userId) {
+        checkCategoryOwnership(id, userId);
+        return categoryRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
     public Optional<Category> findCategory(UUID id) {
         return categoryRepository.findById(id);
     }

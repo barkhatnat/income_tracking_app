@@ -14,6 +14,8 @@ public interface AccountService {
 
     AccountResponseDto createAccount(AccountDto accountDto, UUID userId);
 
+    Optional<Account> findAccount(UUID id, UUID userId);
+
     Optional<Account> findAccount(UUID id);
 
     void updateAccount(UUID id, String title, BigDecimal balance, UUID userId);

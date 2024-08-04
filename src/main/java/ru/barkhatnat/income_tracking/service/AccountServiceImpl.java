@@ -46,6 +46,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
+    public Optional<Account> findAccount(UUID id, UUID userId) {
+        checkAccountOwnership(id, userId);
+        return accountRepository.findById(id);
+    }
+
+    @Override
     public Optional<Account> findAccount(UUID id) {
         return accountRepository.findById(id);
     }
