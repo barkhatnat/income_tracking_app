@@ -42,8 +42,17 @@ public class UserRestController {
                 throw new BindException(bindingResult);
             }
         } else {
-            this.userService.updateUser(userUpdateDto);
+            userService.updateUser(userUpdateDto);
             return ResponseEntity.noContent().build();
         }
+    }
+    @DeleteMapping("/delete/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId){
+        Optional<User> user = userService.findUser(userId);
+        if (user.isPresent() && user.get().getRole().equals("USER")){
+            userService.deleteUser(userId);
+        }
+        return ResponseEntity.noContent().build();
     }
 }
