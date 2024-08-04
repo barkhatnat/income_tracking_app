@@ -1,6 +1,7 @@
 package ru.barkhatnat.income_tracking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.barkhatnat.income_tracking.DTO.OperationDto;
@@ -8,6 +9,9 @@ import ru.barkhatnat.income_tracking.DTO.OperationResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.Operation;
+import ru.barkhatnat.income_tracking.event.OperationCreatedEvent;
+import ru.barkhatnat.income_tracking.event.OperationDeletedEvent;
+import ru.barkhatnat.income_tracking.event.OperationUpdatedEvent;
 import ru.barkhatnat.income_tracking.exception.AccountNotFoundException;
 import ru.barkhatnat.income_tracking.exception.CategoryNotFoundException;
 import ru.barkhatnat.income_tracking.exception.ForbiddenException;
@@ -30,7 +34,7 @@ public class OperationServiceImpl implements OperationService {
     private final OperationMapper operationMapper;
     private final CategoryService categoryService;
     private final AccountService accountService;
-    private final BalanceService balanceService;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Override
@@ -48,7 +52,7 @@ public class OperationServiceImpl implements OperationService {
         Account account = accountService.findAccount(currentAccountId).orElseThrow(() -> new AccountNotFoundException(currentAccountId));
         checkAccountsOwnership(account.getId(), userId);
         Operation operation = operationRepository.save(new Operation(operationDto.amount(), operationDto.datePurchase(), category, account, operationDto.note(), getCreationDate()));
-        balanceService.calculateAccountBalance(account, operation, userId);
+        eventPublisher.publishEvent(new OperationCreatedEvent(this, operation));
         return operationMapper.toOperationResponseDto(operation);
     }
 
@@ -67,19 +71,16 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Transactional
     public void updateOperation(UUID id, BigDecimal amount, Timestamp datePurchase, UUID categoryId, String note, UUID currentAccountId, UUID userId) {
-        operationRepository.findById(id).ifPresentOrElse(operation -> {
-            Account account = accountService.findAccount(currentAccountId).orElseThrow(() -> new AccountNotFoundException(currentAccountId));
-            checkAccountsOwnership(currentAccountId, userId);
-            checkOperationOwnership(id, currentAccountId);
-            Category category = categoryService.findCategory(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
-            operation.setAmount(amount);
-            operation.setDatePurchase(datePurchase);
-            operation.setCategory(category);
-            operation.setNote(note);
-            balanceService.calculateAccountBalance(account, operation, userId);
-        }, () -> {
-            throw new OperationNotFoundException(id);
-        });
+        Operation operation = operationRepository.findById(id).orElseThrow(() -> new OperationNotFoundException(id));
+        Operation oldOperation = operation;
+        checkAccountsOwnership(currentAccountId, userId);
+        checkOperationOwnership(id, currentAccountId);
+        Category category = categoryService.findCategory(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        operation.setAmount(amount);
+        operation.setDatePurchase(datePurchase);
+        operation.setCategory(category);
+        operation.setNote(note);
+        eventPublisher.publishEvent(new OperationUpdatedEvent(this, oldOperation, operation));
     }
 
     @Override
@@ -88,6 +89,8 @@ public class OperationServiceImpl implements OperationService {
         operationRepository.findById(id).ifPresentOrElse(operation -> {
             checkAccountsOwnership(currentAccountId, userId);
             checkOperationOwnership(id, currentAccountId);
+            operationRepository.deleteById(id);
+            eventPublisher.publishEvent(new OperationDeletedEvent(this, operation));
         }, () -> {
             throw new OperationNotFoundException(id);
         });

@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 import ru.barkhatnat.income_tracking.DTO.OperationDto;
 import ru.barkhatnat.income_tracking.DTO.OperationResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
@@ -45,7 +46,7 @@ public class OperationServiceTest {
     @Mock
     private AccountService accountService;
     @Mock
-    private BalanceService balanceService;
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private OperationServiceImpl operationService;
 

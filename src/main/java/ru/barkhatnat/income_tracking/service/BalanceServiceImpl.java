@@ -5,21 +5,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.Operation;
+import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class BalanceServiceImpl implements BalanceService {
-    private final AccountService accountService;
+    private final AccountRepository accountRepository;
 
     @Override
     @Transactional
-    public void calculateAccountBalance(Account account, Operation operation, UUID userId) {
+    public void establishAccountBalance(Account account, Operation operation) {
         BigDecimal newAccountBalance = operation.getCategory().getCategoryType() ?
                 account.getBalance().add(operation.getAmount()) :
                 account.getBalance().subtract(operation.getAmount());
-        accountService.updateAccount(account.getId(), account.getTitle(), newAccountBalance, userId);
+        accountRepository.updateAccountBalance(account.getId(), newAccountBalance);
+    }
+
+    @Override
+    @Transactional
+    public void cancelAccountBalance(Account account, Operation operation) {
+        BigDecimal newAccountBalance = operation.getCategory().getCategoryType() ?
+                account.getBalance().subtract(operation.getAmount()) :
+                account.getBalance().add(operation.getAmount());
+        accountRepository.updateAccountBalance(account.getId(), newAccountBalance);
     }
 }

@@ -37,7 +37,7 @@ public class BalanceServiceTest {
         Account account = new Account(accountId, "Test Account", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Category category = new Category(categoryId, "Test Category", true, user);
         Operation operation = new Operation(UUID.randomUUID(), BigDecimal.valueOf(100), datePurchase, category, account, "Test note", Timestamp.from(Instant.now()));
-        balanceService.calculateAccountBalance(account, operation, userId);
+        balanceService.establishAccountBalance(account, operation);
         verify(accountService, times(1)).updateAccount(account.getId(), account.getTitle(), new BigDecimal(1100), userId);
     }
 
@@ -52,7 +52,7 @@ public class BalanceServiceTest {
         Account account = new Account(accountId, "Test Account", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Category category = new Category(categoryId, "Test Category", false, user);
         Operation operation = new Operation(UUID.randomUUID(), BigDecimal.valueOf(100), datePurchase, category, account, "Test note", Timestamp.from(Instant.now()));
-        balanceService.calculateAccountBalance(account, operation, userId);
+        balanceService.establishAccountBalance(account, operation);
         verify(accountService, times(1)).updateAccount(account.getId(), account.getTitle(), new BigDecimal(900), userId);
     }
 }
