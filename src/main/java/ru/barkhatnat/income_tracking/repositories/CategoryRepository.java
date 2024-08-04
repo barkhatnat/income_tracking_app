@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.barkhatnat.income_tracking.entity.Category;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -15,4 +16,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     List<Category> findCategoriesByUserEmpty();
 
     List<Category> findCategoriesByUserId(UUID userId);
+
+    Optional<Category> findCategoryByTitle(String title);
 }
