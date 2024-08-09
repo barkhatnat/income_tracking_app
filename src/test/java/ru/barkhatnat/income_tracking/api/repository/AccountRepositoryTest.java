@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.User;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
+import ru.barkhatnat.income_tracking.repositories.UserRepository;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -21,10 +22,13 @@ import java.util.UUID;
 public class AccountRepositoryTest {
     @Autowired
     AccountRepository accountRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     public void AccountRepositoryTest_SaveOne_ReturnSavedAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Account savedAccount = accountRepository.save(account);
         Assertions.assertThat(savedAccount).isNotNull();
@@ -35,6 +39,7 @@ public class AccountRepositoryTest {
     @Test
     public void AccountRepositoryTest_FindAll_ReturnAllSaved() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account1 = new Account("Title1", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Account account2 = new Account("Title2", BigDecimal.valueOf(2000), user, Timestamp.from(Instant.now()));
         accountRepository.save(account1);
@@ -46,6 +51,7 @@ public class AccountRepositoryTest {
     @Test
     public void AccountRepositoryTest_FindById_ReturnExistingAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Account savedAccount = accountRepository.save(account);
         Optional<Account> foundAccount = accountRepository.findById(savedAccount.getId());
@@ -63,6 +69,7 @@ public class AccountRepositoryTest {
     @Test
     public void AccountRepositoryTest_FindByUserId_ReturnAccountsOfUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account1 = new Account("Title1", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Account account2 = new Account("Title2", BigDecimal.valueOf(2000), user, Timestamp.from(Instant.now()));
         accountRepository.save(account1);
@@ -74,6 +81,7 @@ public class AccountRepositoryTest {
     @Test
     public void AccountRepositoryTest_Delete_RemoveExistingAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
         Account savedAccount = accountRepository.save(account);
         accountRepository.delete(savedAccount);

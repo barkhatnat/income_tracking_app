@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.User;
 import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
+import ru.barkhatnat.income_tracking.repositories.UserRepository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -20,19 +21,24 @@ import java.util.UUID;
 public class CategoryRepositoryTest {
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @Test
-    public void CategoryRepositoryTest_SaveOne_ReturnSavedCategory(){
-        User user = new User("username", "password","email@email.com", Timestamp.from(Instant.now()), "USER" );
+    public void CategoryRepositoryTest_SaveOne_ReturnSavedCategory() {
+        User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Category category = new Category("Test", Boolean.FALSE, user);
         Category savedCategory = categoryRepository.save(category);
         Assertions.assertThat(savedCategory).isNotNull();
         Assertions.assertThat(savedCategory.getTitle()).isEqualTo("Test");
         Assertions.assertThat(savedCategory.getCategoryType()).isEqualTo(Boolean.FALSE);
     }
+
     @Test
     public void CategoryRepositoryTest_FindAll_ReturnAllSaved() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Category category1 = new Category("Category1", Boolean.TRUE, user);
         Category category2 = new Category("Category2", Boolean.FALSE, user);
         categoryRepository.save(category1);
@@ -45,6 +51,7 @@ public class CategoryRepositoryTest {
     @Test
     public void CategoryRepositoryTest_FindById_ReturnExistingCategory() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Category category = new Category("Test", Boolean.FALSE, user);
         Category savedCategory = categoryRepository.save(category);
         Optional<Category> foundCategory = categoryRepository.findById(savedCategory.getId());
@@ -62,6 +69,7 @@ public class CategoryRepositoryTest {
     @Test
     public void CategoryRepositoryTest_FindByUserId_ReturnCategoriesOfUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Category category1 = new Category("Category1", Boolean.TRUE, user);
         Category category2 = new Category("Category2", Boolean.FALSE, user);
         categoryRepository.save(category1);
@@ -73,12 +81,14 @@ public class CategoryRepositoryTest {
     @Test
     public void CategoryRepositoryTest_Delete_RemoveExistingCategory() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Category category = new Category("Test", Boolean.FALSE, user);
         Category savedCategory = categoryRepository.save(category);
         categoryRepository.delete(savedCategory);
         Optional<Category> foundCategory = categoryRepository.findById(savedCategory.getId());
         Assertions.assertThat(foundCategory).isEmpty();
     }
+
     @Test
     public void CategoryRepositoryTest_FindDefault_ReturnDefaultCategories() {
         Category category1 = new Category("Category1", Boolean.TRUE, null);
