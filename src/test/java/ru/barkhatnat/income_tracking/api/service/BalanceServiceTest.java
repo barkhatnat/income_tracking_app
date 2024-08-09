@@ -1,58 +1,60 @@
 package ru.barkhatnat.income_tracking.api.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.barkhatnat.income_tracking.entity.Account;
-import ru.barkhatnat.income_tracking.entity.Category;
-import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.entity.User;
-import ru.barkhatnat.income_tracking.service.AccountService;
+import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 import ru.barkhatnat.income_tracking.service.BalanceServiceImpl;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BalanceServiceTest {
+
     @Mock
-    private AccountService accountService;
+    private AccountRepository accountRepository;
+
     @InjectMocks
     private BalanceServiceImpl balanceService;
 
-    @Test
-    public void BalanceService_CalculationAdd_AmountAdded() {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        UUID categoryId = UUID.randomUUID();
-        Timestamp datePurchase = Timestamp.from(Instant.now());
+    private Account account;
 
-        User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
-        Account account = new Account(accountId, "Test Account", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
-        Category category = new Category(categoryId, "Test Category", true, user);
-        Operation operation = new Operation(UUID.randomUUID(), BigDecimal.valueOf(100), datePurchase, category, account, "Test note", Timestamp.from(Instant.now()));
-        balanceService.establishAccountBalance(account, operation);
-        verify(accountService, times(1)).updateAccount(account.getId(), account.getTitle(), new BigDecimal(1100), userId);
+    @BeforeEach
+    public void setUp() {
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        account = new Account(UUID.randomUUID(), "Test Account", BigDecimal.valueOf(1000), user, new Timestamp(System.currentTimeMillis()));
     }
 
     @Test
-    public void BalanceService_CalculationAdd_AmountSubtracted() {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        UUID categoryId = UUID.randomUUID();
-        Timestamp datePurchase = Timestamp.from(Instant.now());
+    public void testChangeAccountBalanceByDifference_addition() {
+        BigDecimal difference = BigDecimal.valueOf(100);
+        Boolean categoryType = true;
+        System.out.println(account);
 
-        User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
-        Account account = new Account(accountId, "Test Account", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
-        Category category = new Category(categoryId, "Test Category", false, user);
-        Operation operation = new Operation(UUID.randomUUID(), BigDecimal.valueOf(100), datePurchase, category, account, "Test note", Timestamp.from(Instant.now()));
-        balanceService.establishAccountBalance(account, operation);
-        verify(accountService, times(1)).updateAccount(account.getId(), account.getTitle(), new BigDecimal(900), userId);
+        balanceService.changeAccountBalanceByDifference(account, difference, categoryType);
+
+        BigDecimal expectedBalance = BigDecimal.valueOf(1100);
+        verify(accountRepository, times(1)).updateAccountBalance(eq(account.getId()), eq(expectedBalance));
+    }
+
+    @Test
+    public void testChangeAccountBalanceByDifference_subtraction() {
+        BigDecimal difference = BigDecimal.valueOf(100);
+        Boolean categoryType = false;
+
+        balanceService.changeAccountBalanceByDifference(account, difference, categoryType);
+
+        BigDecimal expectedBalance = BigDecimal.valueOf(900);
+        verify(accountRepository, times(1)).updateAccountBalance(eq(account.getId()), eq(expectedBalance));
     }
 }
