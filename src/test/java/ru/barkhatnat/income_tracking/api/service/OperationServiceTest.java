@@ -20,7 +20,6 @@ import ru.barkhatnat.income_tracking.exception.ForbiddenException;
 import ru.barkhatnat.income_tracking.exception.OperationNotFoundException;
 import ru.barkhatnat.income_tracking.repositories.OperationRepository;
 import ru.barkhatnat.income_tracking.service.AccountService;
-import ru.barkhatnat.income_tracking.service.BalanceService;
 import ru.barkhatnat.income_tracking.service.CategoryService;
 import ru.barkhatnat.income_tracking.service.OperationServiceImpl;
 import ru.barkhatnat.income_tracking.utils.OperationMapper;
