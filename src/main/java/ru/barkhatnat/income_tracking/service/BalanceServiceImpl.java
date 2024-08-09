@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.barkhatnat.income_tracking.entity.Account;
-import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.repositories.AccountRepository;
 
 import java.math.BigDecimal;
@@ -16,19 +15,11 @@ public class BalanceServiceImpl implements BalanceService {
 
     @Override
     @Transactional
-    public void establishAccountBalance(Account account, Operation operation) {
-        BigDecimal newAccountBalance = operation.getCategory().getCategoryType() ?
-                account.getBalance().add(operation.getAmount()) :
-                account.getBalance().subtract(operation.getAmount());
+    public void changeAccountBalanceByDifference(Account account, BigDecimal difference, Boolean categoryType) {
+        BigDecimal newAccountBalance = categoryType ?
+                account.getBalance().add(difference) :
+                account.getBalance().subtract(difference);
         accountRepository.updateAccountBalance(account.getId(), newAccountBalance);
-    }
-
-    @Override
-    @Transactional
-    public void cancelAccountBalance(Account account, Operation operation) {
-        BigDecimal newAccountBalance = operation.getCategory().getCategoryType() ?
-                account.getBalance().subtract(operation.getAmount()) :
-                account.getBalance().add(operation.getAmount());
-        accountRepository.updateAccountBalance(account.getId(), newAccountBalance);
+        accountRepository.save(account);
     }
 }

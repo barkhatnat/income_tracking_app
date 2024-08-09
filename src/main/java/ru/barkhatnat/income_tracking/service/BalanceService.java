@@ -1,11 +1,9 @@
 package ru.barkhatnat.income_tracking.service;
 
 import ru.barkhatnat.income_tracking.entity.Account;
-import ru.barkhatnat.income_tracking.entity.Operation;
+
+import java.math.BigDecimal;
 
 public interface BalanceService {
-
-    void establishAccountBalance(Account account, Operation operation);
-
-    void cancelAccountBalance(Account account, Operation operation);
+    void changeAccountBalanceByDifference(Account account, BigDecimal difference, Boolean categoryType);
 }
