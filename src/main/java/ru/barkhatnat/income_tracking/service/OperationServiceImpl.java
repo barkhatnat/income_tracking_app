@@ -12,10 +12,7 @@ import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.event.OperationCreatedEvent;
 import ru.barkhatnat.income_tracking.event.OperationDeletedEvent;
 import ru.barkhatnat.income_tracking.event.OperationUpdatedEvent;
-import ru.barkhatnat.income_tracking.exception.AccountNotFoundException;
-import ru.barkhatnat.income_tracking.exception.CategoryNotFoundException;
-import ru.barkhatnat.income_tracking.exception.ForbiddenException;
-import ru.barkhatnat.income_tracking.exception.OperationNotFoundException;
+import ru.barkhatnat.income_tracking.exception.*;
 import ru.barkhatnat.income_tracking.repositories.OperationRepository;
 import ru.barkhatnat.income_tracking.utils.OperationMapper;
 
@@ -59,7 +56,13 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Transactional
     public Optional<Operation> findOperation(UUID id, UUID currentAccountId, UUID userId) {
-        return operationRepository.findById(id);
+        Optional<Operation> operation = operationRepository.findById(id);
+        if (operation.isEmpty()) {
+            throw new OperationNotFoundException(id);
+        }
+        checkAccountsOwnership(currentAccountId, userId);
+        checkOperationOwnership(operation.get(), currentAccountId);
+        return operation;
     }
 
     @Override
@@ -71,39 +74,36 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Transactional
     public void updateOperation(UUID id, BigDecimal amount, Timestamp datePurchase, UUID categoryId, String note, UUID currentAccountId, UUID userId) {
-        Operation operation = operationRepository.findById(id).orElseThrow(() -> new OperationNotFoundException(id));
-        Operation oldOperation = operation;
-        checkAccountsOwnership(currentAccountId, userId);
-        checkOperationOwnership(id, currentAccountId);
+        Operation operation = findOperation(id, currentAccountId, userId).orElseThrow(() -> new OperationNotFoundException(id));
         Category category = categoryService.findCategory(categoryId).orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        Boolean oldCategoryType = operation.getCategory().getCategoryType();
+        Boolean newCategoryType = category.getCategoryType();
+        if (oldCategoryType != newCategoryType) {
+            throw new CategoryTypeException("It is not possible to change the operation category to a different type of category");
+        }
+        BigDecimal difference = (amount.subtract(operation.getAmount()));
         operation.setAmount(amount);
         operation.setDatePurchase(datePurchase);
         operation.setCategory(category);
         operation.setNote(note);
-        eventPublisher.publishEvent(new OperationUpdatedEvent(this, oldOperation, operation));
+        operationRepository.save(operation);
+        eventPublisher.publishEvent(new OperationUpdatedEvent(this, operation, difference));
     }
 
     @Override
     @Transactional
     public void deleteOperation(UUID id, UUID currentAccountId, UUID userId) {
-        operationRepository.findById(id).ifPresentOrElse(operation -> {
-            checkAccountsOwnership(currentAccountId, userId);
-            checkOperationOwnership(id, currentAccountId);
-            operationRepository.deleteById(id);
-            eventPublisher.publishEvent(new OperationDeletedEvent(this, operation));
-        }, () -> {
-            throw new OperationNotFoundException(id);
-        });
+        Operation operation = findOperation(id, currentAccountId, userId).orElseThrow(() -> new OperationNotFoundException(id));
+        operationRepository.deleteById(id);
+        eventPublisher.publishEvent(new OperationDeletedEvent(this, operation));
     }
 
     private Timestamp getCreationDate() {
         return Timestamp.from(Instant.now());
     }
 
-    private void checkOperationOwnership(UUID operationId, UUID accountId) {
-        if (!operationRepository.findById(operationId)
-                .map(operation -> operation.getAccount() != null && operation.getAccount().getId().equals(accountId))
-                .orElse(false)) {
+    private void checkOperationOwnership(Operation operation, UUID accountId) {
+        if (operation.getAccount() == null || !operation.getAccount().getId().equals(accountId)) {
             throw new ForbiddenException("Access denied");
         }
     }
