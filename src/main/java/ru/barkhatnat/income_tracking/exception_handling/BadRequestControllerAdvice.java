@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.barkhatnat.income_tracking.exception.CategoryTypeException;
 import ru.barkhatnat.income_tracking.exception.UserAlreadyExistsException;
 
 import java.util.List;
@@ -37,5 +38,12 @@ public class BadRequestControllerAdvice {
         String message = messageSource.getMessage(e.getMessage(), new Object[0], e.getMessage(), locale);
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, message);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
+    }
+
+    @ExceptionHandler(CategoryTypeException.class)
+    public ResponseEntity<ProblemDetail> handleCategoryTypeException(CategoryTypeException e, Locale locale) {
+        String message = messageSource.getMessage(e.getMessage(), new Object[0], e.getMessage(), locale);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 }
