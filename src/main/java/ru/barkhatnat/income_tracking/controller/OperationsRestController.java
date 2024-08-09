@@ -39,7 +39,7 @@ public class OperationsRestController {
     @PostMapping
     public ResponseEntity<?> createOperation(@Valid @RequestBody OperationDto operationDto,
                                              BindingResult bindingResult,
-                                             UriComponentsBuilder uriComponentsBuilder, @PathVariable String accountId) throws BindException {
+                                             UriComponentsBuilder uriComponentsBuilder, @PathVariable("accountId") String accountId) throws BindException {
         if (bindingResult.hasErrors()) {
             if (bindingResult instanceof BindException exception) {
                 throw exception;
