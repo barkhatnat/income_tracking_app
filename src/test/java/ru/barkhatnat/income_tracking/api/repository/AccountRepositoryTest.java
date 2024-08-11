@@ -26,7 +26,7 @@ public class AccountRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    public void AccountRepositoryTest_SaveOne_ReturnSavedAccount() {
+    public void accountRepositoryTest_SaveOne_ReturnSavedAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -37,7 +37,7 @@ public class AccountRepositoryTest {
     }
 
     @Test
-    public void AccountRepositoryTest_FindAll_ReturnAllSaved() {
+    public void accountRepositoryTest_FindAll_ReturnAllSaved() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account1 = new Account("Title1", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -49,7 +49,7 @@ public class AccountRepositoryTest {
     }
 
     @Test
-    public void AccountRepositoryTest_FindById_ReturnExistingAccount() {
+    public void accountRepositoryTest_FindById_ReturnExistingAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -60,14 +60,14 @@ public class AccountRepositoryTest {
     }
 
     @Test
-    public void AccountRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
+    public void accountRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
         UUID uuid = UUID.randomUUID();
         Optional<Account> foundAccount = accountRepository.findById(uuid); // Предположим, что ID 1 не существует
         Assertions.assertThat(foundAccount).isEmpty();
     }
 
     @Test
-    public void AccountRepositoryTest_FindByUserId_ReturnAccountsOfUser() {
+    public void accountRepositoryTest_FindByUserId_ReturnAccountsOfUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account1 = new Account("Title1", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -79,7 +79,7 @@ public class AccountRepositoryTest {
     }
 
     @Test
-    public void AccountRepositoryTest_Delete_RemoveExistingAccount() {
+    public void accountRepositoryTest_Delete_RemoveExistingAccount() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));

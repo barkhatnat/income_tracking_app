@@ -39,7 +39,7 @@ public class CategoryServiceTest {
     private CategoryServiceImpl categoryService;
 
     @Test
-    public void CategoryService_CreateCategory_ReturnCategory() {
+    public void categoryService_CreateCategory_ReturnCategory() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         CategoryDto categoryDto = new CategoryDto("Test Category", Boolean.FALSE);
@@ -56,7 +56,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_FindAllCategories_ReturnAllCategories() {
+    public void categoryService_FindAllCategories_ReturnAllCategories() {
         UUID userId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Category userCategory1 = new Category("userCategory1", Boolean.FALSE, user);
@@ -72,7 +72,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_FindCategoryById_ReturnCategory() {
+    public void categoryService_FindCategoryById_ReturnCategory() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
@@ -86,7 +86,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_UpdateCategoryById_ReturnUpdatedCategory() {
+    public void categoryService_UpdateCategoryById_ReturnUpdatedCategory() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         String newTitle = "Updated Category";
@@ -104,7 +104,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_UpdateCategoryById_ThrowForbiddenException() {
+    public void categoryService_UpdateCategoryById_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -119,7 +119,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_UpdateCategoryById_ThrowCategoryNotFoundException() {
+    public void categoryService_UpdateCategoryById_ThrowCategoryNotFoundException() {
         UUID categoryId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         String newTitle = "Updated Category";
@@ -131,7 +131,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_DeleteCategory_CategoryIsDeleted() {
+    public void categoryService_DeleteCategory_CategoryIsDeleted() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
@@ -145,7 +145,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_DeleteCategory_ThrowCategoryNotFoundException() {
+    public void categoryService_DeleteCategory_ThrowCategoryNotFoundException() {
         UUID categoryId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
@@ -156,7 +156,7 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void CategoryService_DeleteCategory_ThrowForbiddenException() {
+    public void categoryService_DeleteCategory_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();

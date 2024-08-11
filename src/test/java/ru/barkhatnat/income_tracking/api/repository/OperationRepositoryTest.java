@@ -36,7 +36,7 @@ public class OperationRepositoryTest {
     private AccountRepository accountRepository;
 
     @Test
-    public void OperationRepositoryTest_SaveOne_ReturnSavedOperation() throws ParseException {
+    public void operationRepositoryTest_SaveOne_ReturnSavedOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -53,7 +53,7 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindAll_ReturnAllSaved() throws ParseException {
+    public void operationRepositoryTest_FindAll_ReturnAllSaved() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -74,7 +74,7 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindById_ReturnExistingOperation() throws ParseException {
+    public void operationRepositoryTest_FindById_ReturnExistingOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -92,14 +92,14 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
+    public void operationRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
         UUID uuid = UUID.randomUUID();
         Optional<Operation> foundOperation = operationRepository.findById(uuid); // Предположим, что ID 1 не существует
         Assertions.assertThat(foundOperation).isEmpty();
     }
 
     @Test
-    public void OperationRepositoryTest_FindByAccountId_ReturnOperationsOfAccount() throws ParseException {
+    public void operationRepositoryTest_FindByAccountId_ReturnOperationsOfAccount() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
@@ -121,7 +121,7 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_Delete_RemoveExistingOperation() throws ParseException {
+    public void operationRepositoryTest_Delete_RemoveExistingOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));

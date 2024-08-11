@@ -36,7 +36,7 @@ public class UserServiceTest {
     private UserServiceImpl userService;
 
     @Test
-    public void UserService_CreateUser_ReturnDto() throws UserAlreadyExistsException {
+    public void userService_CreateUser_ReturnDto() throws UserAlreadyExistsException {
         UUID userId = UUID.randomUUID();
         User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserCreateDto userCreateDto = new UserCreateDto("username", "password", "email@email.com");
@@ -53,7 +53,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UserService_CreateUserAlreadyExists_ReturnException() {
+    public void userService_CreateUserAlreadyExists_ReturnException() {
         UUID userId = UUID.randomUUID();
         User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserCreateDto userCreateDto = new UserCreateDto("username", "password", "email@email.com");
@@ -64,7 +64,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UserService_FindUserById_ReturnUser() {
+    public void userService_FindUserById_ReturnUser() {
         UUID userId = UUID.randomUUID();
         User savedUser = new User(userId,"username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         when(userRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(savedUser));
@@ -73,7 +73,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UserService_FindUserById_ReturnEmpty() {
+    public void userService_FindUserById_ReturnEmpty() {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         Optional<User> result = userService.findUser(userId);
@@ -82,7 +82,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UserService_UpdateUser_ReturnUser() {
+    public void userService_UpdateUser_ReturnUser() {
         UUID userId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         UserUpdateDto userUpdateDto = new UserUpdateDto(userId, "new_username", "new_password", "email@email.com");
@@ -99,7 +99,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void UserService_UpdateUser_ReturnException() {
+    public void userService_UpdateUser_ReturnException() {
         UUID userId = UUID.randomUUID();
         UserUpdateDto userUpdateDto = new UserUpdateDto(userId, "new_username", "new_password", "email@email.com");
         when(userRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.empty());
