@@ -169,4 +169,33 @@ public class CategoryServiceTest {
                 () -> categoryService.deleteCategory(categoryId, userId));
     }
 
+    @Test
+    public void testDeleteCategory_ForbiddenException() {
+        UUID categoryId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        Category category = new Category(categoryId, "defaultCategory", Boolean.FALSE, null);
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+
+        assertThrows(ForbiddenException.class, () -> {
+            categoryService.deleteCategory(categoryId, userId);
+        });
+    }
+
+    @Test
+    public void testDeleteCategory_DefaultCategoryNotFound() {
+        UUID categoryId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+
+        Category category = new Category(categoryId, "defaultCategory", Boolean.FALSE, user);
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        when(categoryRepository.findCategoryByTitle("Unknown")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> {
+            categoryService.deleteCategory(categoryId, userId);
+        });
+    }
 }
