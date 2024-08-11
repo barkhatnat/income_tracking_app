@@ -28,7 +28,7 @@ public class SecurityUtilTest {
     private UserPrincipal userPrincipal;
 
     @Test
-    public void SecurityUtil_GetCurrentUserDetails_ReturnAuthenticatedUserDetails() {
+    public void securityUtil_GetCurrentUserDetails_ReturnAuthenticatedUserDetails() {
         when(authentication.isAuthenticated()).thenReturn(true);
         when(authentication.getPrincipal()).thenReturn(userPrincipal);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -37,7 +37,7 @@ public class SecurityUtilTest {
     }
 
     @Test
-    public void SecurityUtil_GetCurrentUserDetails_ReturnException() {
+    public void securityUtil_GetCurrentUserDetails_ReturnException() {
         when(authentication.isAuthenticated()).thenReturn(false);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         assertThrows(AuthenticationException.class, () -> securityUtil.getCurrentUserDetails());

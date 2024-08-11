@@ -12,6 +12,10 @@ public interface CategoryService {
 
     CategoryResponseDto createCategory(CategoryDto categoryDto, UUID userId);
 
+    CategoryResponseDto createDefaultCategory(CategoryDto categoryDto);
+
+    Optional<Category> findCategory(UUID id, UUID userId);
+
     Optional<Category> findCategory(UUID id);
 
     void updateCategory(UUID id, String title, Boolean categoryType, UUID userId);

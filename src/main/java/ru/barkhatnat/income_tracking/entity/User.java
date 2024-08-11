@@ -48,10 +48,10 @@ public class User {
     @NotNull
     private String role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Account> accounts;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Category> categories;
 
     public User(String username, String password, String email, Timestamp createdAt, String role) {

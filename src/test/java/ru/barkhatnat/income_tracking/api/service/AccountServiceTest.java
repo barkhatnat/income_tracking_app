@@ -40,7 +40,7 @@ public class AccountServiceTest {
     private AccountServiceImpl accountService;
 
     @Test
-    public void AccountService_CreateAccount_ReturnAccount() {
+    public void accountService_CreateAccount_ReturnAccount() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         AccountDto accountDto = new AccountDto("Test Category", BigDecimal.valueOf(10000));
@@ -57,7 +57,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_FindAllUserAccounts_ReturnAllUserAccounts() {
+    public void accountService_FindAllUserAccounts_ReturnAllUserAccounts() {
         UUID userId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         Account userAccount1 = new Account("userAccount1", BigDecimal.valueOf(10000), user, Timestamp.from(Instant.now()));
@@ -70,7 +70,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_FindAccountById_ReturnAccount() {
+    public void accountService_FindAccountById_ReturnAccount() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
@@ -84,7 +84,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_UpdateAccountById_ReturnUpdatedAccount() {
+    public void accountService_UpdateAccountById_ReturnUpdatedAccount() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         String newTitle = "Updated Account";
@@ -103,7 +103,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_UpdateAccountById_ThrowForbiddenException() {
+    public void accountService_UpdateAccountById_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
@@ -118,7 +118,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_UpdateAccountById_ThrowAccountNotFoundException() {
+    public void accountService_UpdateAccountById_ThrowAccountNotFoundException() {
         UUID accountId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         String newTitle = "Updated Account";
@@ -130,7 +130,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_DeleteAccountById_DeleteAccount() {
+    public void accountService_DeleteAccountById_DeleteAccount() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         User user = new User(userId, "username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
@@ -145,7 +145,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_DeleteAccountById_ThrowForbiddenException() {
+    public void accountService_DeleteAccountById_ThrowForbiddenException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
@@ -159,7 +159,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void AccountService_DeleteAccountById_ThrowAccountNotFoundException() {
+    public void accountService_DeleteAccountById_ThrowAccountNotFoundException() {
         UUID accountId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 

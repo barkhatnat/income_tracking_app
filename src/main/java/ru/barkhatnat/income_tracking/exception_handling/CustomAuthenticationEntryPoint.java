@@ -1,4 +1,4 @@
-package ru.barkhatnat.income_tracking.exсeption_handling;
+package ru.barkhatnat.income_tracking.exception_handling;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

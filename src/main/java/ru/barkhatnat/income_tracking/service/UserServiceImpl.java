@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDto createUser(UserCreateDto userCreateDto) throws UserAlreadyExistsException {
         if (userRepository.findByEmail(userCreateDto.email()).isPresent()) {
-            throw new UserAlreadyExistsException("User with username " + userCreateDto.username() + " already exists");
+            throw new UserAlreadyExistsException("User with email " + userCreateDto.email() + " already exists");
         }
         String encodedPassword = passwordEncoder.encode(userCreateDto.password());
         User user = userRepository.save(new User(userCreateDto.username(), encodedPassword, userCreateDto.email(), getCreationDate(), getRole()));

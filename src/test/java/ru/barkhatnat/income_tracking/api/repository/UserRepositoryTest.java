@@ -23,7 +23,7 @@ public class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    public void UserRepositoryTest_SaveOne_ReturnSavedUser() {
+    public void userRepositoryTest_SaveOne_ReturnSavedUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         User savedUser = userRepository.save(user);
         Assertions.assertThat(savedUser).isNotNull();
@@ -31,7 +31,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void UserRepositoryTest_FindAll_ReturnAllSaved() {
+    public void userRepositoryTest_FindAll_ReturnAllSaved() {
         User user1 = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         User user2 = new User("username2", "password2", "email2@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user1);
@@ -42,7 +42,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void UserRepositoryTest_FindById_ReturnExistingUser() {
+    public void userRepositoryTest_FindById_ReturnExistingUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         User savedUser = userRepository.save(user);
         Optional<User> foundUser = userRepository.findById(savedUser.getId());
@@ -51,14 +51,14 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void UserRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
+    public void userRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
         UUID uuid = UUID.randomUUID();
         Optional<User> foundUser = userRepository.findById(uuid);
         Assertions.assertThat(foundUser).isEmpty();
     }
 
     @Test
-    public void UserRepositoryTest_FindByUsername_ReturnExistingUser() {
+    public void userRepositoryTest_FindByUsername_ReturnExistingUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         userRepository.save(user);
         Optional<User> foundUser = userRepository.findByEmail("email@email.com");
@@ -67,13 +67,13 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void UserRepositoryTest_FindByUsername_ReturnEmptyWhenNotFound() {
+    public void userRepositoryTest_FindByUsername_ReturnEmptyWhenNotFound() {
         Optional<User> foundUser = userRepository.findByEmail("nonexistent");
         Assertions.assertThat(foundUser).isEmpty();
     }
 
     @Test
-    public void UserRepositoryTest_Delete_RemoveExistingUser() {
+    public void userRepositoryTest_Delete_RemoveExistingUser() {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
         User savedUser = userRepository.save(user);
         userRepository.delete(savedUser);

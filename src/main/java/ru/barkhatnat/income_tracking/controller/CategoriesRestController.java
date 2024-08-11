@@ -55,4 +55,24 @@ public class CategoriesRestController {
                     .body(categoryResponseDto);
         }
     }
+
+    @PostMapping("/default")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createDefaultCategory(@Valid @RequestBody CategoryDto categoryDto,
+                                                   BindingResult bindingResult,
+                                                   UriComponentsBuilder uriComponentsBuilder) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            CategoryResponseDto categoryResponseDto = categoryService.createDefaultCategory(categoryDto);
+            return ResponseEntity.created(URI.create(uriComponentsBuilder
+                            .replacePath("/categories")
+                            .build().toUriString()))
+                    .body(categoryResponseDto);
+        }
+    }
 }

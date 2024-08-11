@@ -9,7 +9,10 @@ import ru.barkhatnat.income_tracking.entity.Account;
 import ru.barkhatnat.income_tracking.entity.Category;
 import ru.barkhatnat.income_tracking.entity.Operation;
 import ru.barkhatnat.income_tracking.entity.User;
+import ru.barkhatnat.income_tracking.repositories.AccountRepository;
+import ru.barkhatnat.income_tracking.repositories.CategoryRepository;
 import ru.barkhatnat.income_tracking.repositories.OperationRepository;
+import ru.barkhatnat.income_tracking.repositories.UserRepository;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -24,13 +27,22 @@ import java.util.UUID;
 @ActiveProfiles("test")
 public class OperationRepositoryTest {
     @Autowired
-    OperationRepository operationRepository;
+    private OperationRepository operationRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Test
-    public void OperationRepositoryTest_SaveOne_ReturnSavedOperation() throws ParseException {
+    public void operationRepositoryTest_SaveOne_ReturnSavedOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
+        accountRepository.save(account);
         Category category = new Category("Test", Boolean.FALSE, user);
+        categoryRepository.save(category);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp operationDate = new Timestamp(dateFormat.parse("2024-03-15").getTime());
         Operation operation = new Operation(BigDecimal.valueOf(100), operationDate, category, account, "Test note", Timestamp.from(Instant.now()));
@@ -41,10 +53,13 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindAll_ReturnAllSaved() throws ParseException {
+    public void operationRepositoryTest_FindAll_ReturnAllSaved() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
+        accountRepository.save(account);
         Category category = new Category("Test", Boolean.FALSE, user);
+        categoryRepository.save(category);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp operationDate1 = new Timestamp(dateFormat.parse("2024-03-10").getTime());
         Timestamp operationDate2 = new Timestamp(dateFormat.parse("2024-03-12").getTime());
@@ -59,10 +74,13 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindById_ReturnExistingOperation() throws ParseException {
+    public void operationRepositoryTest_FindById_ReturnExistingOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
+        accountRepository.save(account);
         Category category = new Category("Test", Boolean.FALSE, user);
+        categoryRepository.save(category);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp operationDate = new Timestamp(dateFormat.parse("2024-03-15").getTime());
         Operation operation = new Operation(BigDecimal.valueOf(100), operationDate, category, account, "Test note",
@@ -74,17 +92,20 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
+    public void operationRepositoryTest_FindById_ReturnEmptyWhenNotFound() {
         UUID uuid = UUID.randomUUID();
         Optional<Operation> foundOperation = operationRepository.findById(uuid); // Предположим, что ID 1 не существует
         Assertions.assertThat(foundOperation).isEmpty();
     }
 
     @Test
-    public void OperationRepositoryTest_FindByAccountId_ReturnOperationsOfAccount() throws ParseException {
+    public void operationRepositoryTest_FindByAccountId_ReturnOperationsOfAccount() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
+        accountRepository.save(account);
         Category category = new Category("Test", Boolean.FALSE, user);
+        categoryRepository.save(category);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp operationDate1 = new Timestamp(dateFormat.parse("2024-03-10").getTime());
         Timestamp operationDate2 = new Timestamp(dateFormat.parse("2024-03-12").getTime());
@@ -100,10 +121,13 @@ public class OperationRepositoryTest {
     }
 
     @Test
-    public void OperationRepositoryTest_Delete_RemoveExistingOperation() throws ParseException {
+    public void operationRepositoryTest_Delete_RemoveExistingOperation() throws ParseException {
         User user = new User("username", "password", "email@email.com", Timestamp.from(Instant.now()), "USER");
+        userRepository.save(user);
         Account account = new Account("Title", BigDecimal.valueOf(1000), user, Timestamp.from(Instant.now()));
+        accountRepository.save(account);
         Category category = new Category("Test", Boolean.FALSE, user);
+        categoryRepository.save(category);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Timestamp operationDate = new Timestamp(dateFormat.parse("2024-03-15").getTime());
         Operation operation = new Operation(BigDecimal.valueOf(100), operationDate, category, account, "Test note",

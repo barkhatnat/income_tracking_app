@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 import ru.barkhatnat.income_tracking.DTO.OperationDto;
 import ru.barkhatnat.income_tracking.DTO.OperationResponseDto;
 import ru.barkhatnat.income_tracking.entity.Account;
@@ -43,11 +44,14 @@ public class OperationServiceTest {
     private CategoryService categoryService;
     @Mock
     private AccountService accountService;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private OperationServiceImpl operationService;
 
+
     @Test
-    public void OperationService_CreateOperation_ReturnOperationResponseDto() {
+    public void operationService_CreateOperation_ReturnOperationResponseDto() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -66,13 +70,12 @@ public class OperationServiceTest {
         when(accountService.findAccount(accountId)).thenReturn(Optional.of(operation.getAccount()));
         when(operationRepository.save(Mockito.any(Operation.class))).thenReturn(operation);
         when(operationMapper.toOperationResponseDto(operation)).thenReturn(expectedOperationResponseDto);
-
         OperationResponseDto actualOperationResponseDto = operationService.createOperation(operationDto, accountId, userId);
         Assertions.assertThat(actualOperationResponseDto).isEqualTo(expectedOperationResponseDto);
     }
 
     @Test
-    public void OperationService_CreateOperation_ThrowAccountNotFoundException() {
+    public void operationService_CreateOperation_ThrowAccountNotFoundException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -94,7 +97,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_CreateOperation_ThrowCategoryNotFoundException() {
+    public void operationService_CreateOperation_ThrowCategoryNotFoundException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -111,7 +114,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_FindAllOperationsByAccountId_ReturnListOfOperations() {
+    public void operationService_FindAllOperationsByAccountId_ReturnListOfOperations() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -124,14 +127,13 @@ public class OperationServiceTest {
 
         when(operationRepository.findOperationsByAccountId(accountId)).thenReturn(List.of(operation1, operation2));
         when(accountService.findAccount(accountId)).thenReturn(Optional.of(account));
-
         List<Operation> actualOperations = operationService.findAllOperationsByAccountId(accountId, userId);
         Assertions.assertThat(actualOperations).containsExactlyInAnyOrder(operation1, operation2);
         Assertions.assertThat(actualOperations.size()).isEqualTo(2);
     }
 
     @Test
-    public void OperationService_FindAllOperationsByAccountId_ThrowForbiddenExceptionByUser() {
+    public void operationService_FindAllOperationsByAccountId_ThrowForbiddenExceptionByUser() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
@@ -146,7 +148,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_FindAllOperationsByAccountId_ThrowForbiddenExceptionByAccount() {
+    public void operationService_FindAllOperationsByAccountId_ThrowForbiddenExceptionByAccount() {
         UUID userId = UUID.randomUUID();
         UUID otherAccountId = UUID.randomUUID();
 
@@ -155,7 +157,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_FindOperation_ReturnOptionalOperation() {
+    public void operationService_FindOperation_ReturnOptionalOperation() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -174,7 +176,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_UpdateOperation_OperationUpdated() {
+    public void operationService_UpdateOperation_OperationUpdated() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -198,7 +200,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_UpdateOperation_ThrowCategoryNotFoundException() {
+    public void operationService_UpdateOperation_ThrowCategoryNotFoundException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -219,7 +221,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_UpdateOperation_ThrowOperationNotFoundException() {
+    public void operationService_UpdateOperation_ThrowOperationNotFoundException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -233,7 +235,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_DeleteOperation_SuccessDeleteOperation() {
+    public void operationService_DeleteOperation_SuccessDeleteOperation() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -253,7 +255,7 @@ public class OperationServiceTest {
     }
 
     @Test
-    public void OperationService_DeleteOperation_ThrowOperationNotFoundException() {
+    public void operationService_DeleteOperation_ThrowOperationNotFoundException() {
         UUID userId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         UUID otherOperationId = UUID.randomUUID();
@@ -261,5 +263,4 @@ public class OperationServiceTest {
         assertThrows(OperationNotFoundException.class,
                 () -> operationService.deleteOperation(otherOperationId, accountId, userId));
     }
-
 }

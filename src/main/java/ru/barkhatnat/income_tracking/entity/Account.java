@@ -35,7 +35,7 @@ public class Account {
     @DecimalMax(value = "9999999999.99")
     private BigDecimal balance;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
@@ -44,7 +44,7 @@ public class Account {
     @NotNull
     private Timestamp createdAt;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true)
     private List<Operation> operations;
 
     public Account(String title, BigDecimal balance, User user, Timestamp createdAt) {
