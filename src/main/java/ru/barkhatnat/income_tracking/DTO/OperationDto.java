@@ -18,9 +18,7 @@ public record OperationDto(
         Timestamp datePurchase,
         @NotNull
         UUID categoryId,
-        @NotNull
         @Size(min = 1, max = 512)
         String note
-
 ) {
 }
